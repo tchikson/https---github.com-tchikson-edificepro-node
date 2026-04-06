@@ -4,9 +4,9 @@
  * Encapsule la logique métier : détection des conflits d'affectation,
  * gestion des membres, et opérations CRUD.
  */
-const { Op } = require("sequelize");
-const { Equipe, EquipeUser, Affectation } = require("../models");
-const { logger } = require("../config/logger");
+const { Op } = require('sequelize');
+const { Equipe, EquipeUser, Affectation } = require('../models');
+const { logger } = require('../config/logger');
 
 /**
  * Recherche une affectation conflictuelle pour un utilisateur sur une période donnée.
@@ -32,7 +32,7 @@ async function findConflictingAssignment(
   }
   return EquipeUser.findOne({
     where,
-    include: [{ model: Equipe, as: "equipe" }],
+    include: [{ model: Equipe, as: 'equipe' }],
   });
 }
 
@@ -55,7 +55,7 @@ async function createEquipe(data, memberIds = []) {
     logger.info(`Équipe créée : ${equipe.id}`);
     return equipe;
   } catch (err) {
-    logger.error("Erreur création équipe", { error: err.message });
+    logger.error('Erreur création équipe', { error: err.message });
     throw err;
   }
 }
@@ -78,7 +78,7 @@ async function updateEquipeMembers(equipe, members) {
     }
     logger.info(`Membres de l'équipe ${equipe.id} mis à jour`);
   } catch (err) {
-    logger.error("Erreur mise à jour membres équipe", { error: err.message });
+    logger.error('Erreur mise à jour membres équipe', { error: err.message });
     throw err;
   }
 }
@@ -90,7 +90,7 @@ async function updateEquipeMembers(equipe, members) {
 async function deleteEquipe(equipeOrId) {
   try {
     const equipe =
-      typeof equipeOrId === "object"
+      typeof equipeOrId === 'object'
         ? equipeOrId
         : await Equipe.findByPk(equipeOrId);
     await EquipeUser.destroy({ where: { equipeId: equipe.id } });
@@ -98,7 +98,7 @@ async function deleteEquipe(equipeOrId) {
     await equipe.destroy();
     logger.info(`Équipe supprimée : ${equipe.id}`);
   } catch (err) {
-    logger.error("Erreur suppression équipe", { error: err.message });
+    logger.error('Erreur suppression équipe', { error: err.message });
     throw err;
   }
 }

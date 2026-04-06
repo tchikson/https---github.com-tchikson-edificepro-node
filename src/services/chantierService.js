@@ -4,17 +4,16 @@
  * Encapsule la logique métier : vérification des chevauchements de dates,
  * validation des compétences d'équipe, et opérations CRUD.
  */
-const { Op } = require("sequelize");
+const { Op } = require('sequelize');
 const {
   Chantier,
   Affectation,
-  Equipe,
   EquipeUser,
   CompetenceChantier,
   CompetenceUser,
   User,
-} = require("../models");
-const { logger } = require("../config/logger");
+} = require('../models');
+const { logger } = require('../config/logger');
 
 /**
  * Vérifie si une équipe a un chevauchement de dates avec un chantier existant.
@@ -51,7 +50,7 @@ async function hasDateOverlap(
 async function equipeHasRequiredCompetences(equipe, chantierId) {
   const requiredCompetences = await CompetenceChantier.findAll({
     where: { chantierId },
-    attributes: ["competenceId"],
+    attributes: ['competenceId'],
   });
 
   if (requiredCompetences.length === 0) return true;
@@ -61,8 +60,8 @@ async function equipeHasRequiredCompetences(equipe, chantierId) {
     include: [
       {
         model: User,
-        as: "utilisateur",
-        include: [{ model: CompetenceUser, as: "competenceUsers" }],
+        as: 'utilisateur',
+        include: [{ model: CompetenceUser, as: 'competenceUsers' }],
       },
     ],
   });
@@ -98,7 +97,7 @@ async function createChantier(data, competenceIds = []) {
     logger.info(`Chantier créé : ${chantier.id}`);
     return chantier;
   } catch (err) {
-    logger.error("Erreur création chantier", { error: err.message });
+    logger.error('Erreur création chantier', { error: err.message });
     throw err;
   }
 }
@@ -115,7 +114,7 @@ async function updateChantier(chantier, data) {
     logger.info(`Chantier mis à jour : ${chantier.id}`);
     return chantier;
   } catch (err) {
-    logger.error("Erreur mise à jour chantier", { error: err.message });
+    logger.error('Erreur mise à jour chantier', { error: err.message });
     throw err;
   }
 }
@@ -131,7 +130,7 @@ async function deleteChantier(chantier) {
     await chantier.destroy();
     logger.info(`Chantier supprimé : ${chantier.id}`);
   } catch (err) {
-    logger.error("Erreur suppression chantier", { error: err.message });
+    logger.error('Erreur suppression chantier', { error: err.message });
     throw err;
   }
 }
