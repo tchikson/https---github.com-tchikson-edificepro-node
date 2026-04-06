@@ -4,9 +4,9 @@
  * Encapsule la logique métier : détection des conflits d'affectation,
  * gestion des membres, et opérations CRUD.
  */
-const { Op } = require('sequelize');
-const { Equipe, EquipeUser, Affectation } = require('../models');
-const { logger } = require('../config/logger');
+const { Op } = require("sequelize");
+const { Equipe, EquipeUser, Affectation } = require("../models");
+const { logger } = require("../config/logger");
 
 /**
  * Recherche une affectation conflictuelle pour un utilisateur sur une période donnée.
@@ -16,7 +16,12 @@ const { logger } = require('../config/logger');
  * @param {number|null} excludeEquipeId - Équipe à exclure (édition)
  * @returns {Promise<object|null>} L'affectation conflictuelle ou null
  */
-async function findConflictingAssignment(utilisateurId, dateDebut, dateFin, excludeEquipeId = null) {
+async function findConflictingAssignment(
+  utilisateurId,
+  dateDebut,
+  dateFin,
+  excludeEquipeId = null,
+) {
   const where = {
     utilisateurId,
     dateDebut: { [Op.lt]: dateFin },
@@ -27,7 +32,7 @@ async function findConflictingAssignment(utilisateurId, dateDebut, dateFin, excl
   }
   return EquipeUser.findOne({
     where,
-    include: [{ model: Equipe, as: 'equipe' }],
+    include: [{ model: Equipe, as: "equipe" }],
   });
 }
 
@@ -36,13 +41,21 @@ async function findConflictingAssignment(utilisateurId, dateDebut, dateFin, excl
  * @param {object} data - { nomEquipe, chefEquipeId, dateDebut, dateFin }
  * @returns {Promise<object>}
  */
-async function createEquipe(data) {
+async function createEquipe(data, memberIds = []) {
   try {
     const equipe = await Equipe.create(data);
+    for (const userId of memberIds) {
+      await EquipeUser.create({
+        equipeId: equipe.id,
+        utilisateurId: userId,
+        dateDebut: data.dateDebut,
+        dateFin: data.dateFin,
+      });
+    }
     logger.info(`Équipe créée : ${equipe.id}`);
     return equipe;
   } catch (err) {
-    logger.error('Erreur création équipe', { error: err.message });
+    logger.error("Erreur création équipe", { error: err.message });
     throw err;
   }
 }
@@ -65,7 +78,7 @@ async function updateEquipeMembers(equipe, members) {
     }
     logger.info(`Membres de l'équipe ${equipe.id} mis à jour`);
   } catch (err) {
-    logger.error('Erreur mise à jour membres équipe', { error: err.message });
+    logger.error("Erreur mise à jour membres équipe", { error: err.message });
     throw err;
   }
 }
@@ -74,14 +87,18 @@ async function updateEquipeMembers(equipe, members) {
  * Supprime une équipe et ses relations.
  * @param {object} equipe - Instance Equipe
  */
-async function deleteEquipe(equipe) {
+async function deleteEquipe(equipeOrId) {
   try {
+    const equipe =
+      typeof equipeOrId === "object"
+        ? equipeOrId
+        : await Equipe.findByPk(equipeOrId);
     await EquipeUser.destroy({ where: { equipeId: equipe.id } });
     await Affectation.destroy({ where: { equipeId: equipe.id } });
     await equipe.destroy();
     logger.info(`Équipe supprimée : ${equipe.id}`);
   } catch (err) {
-    logger.error('Erreur suppression équipe', { error: err.message });
+    logger.error("Erreur suppression équipe", { error: err.message });
     throw err;
   }
 }

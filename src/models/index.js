@@ -4,16 +4,18 @@
  * Charge chaque modèle, exécute les associations, et expose
  * l'instance sequelize ainsi que tous les modèles.
  */
-const { Sequelize } = require('sequelize');
-const path = require('path');
+const { Sequelize } = require("sequelize");
+const path = require("path");
 
-const env = process.env.APP_ENV || 'development';
+const env = process.env.APP_ENV || "development";
 
 // Charger .env.test en mode test, sinon .env
-if (env === 'test') {
-  require('dotenv').config({ path: path.resolve(__dirname, '../../.env.test') });
+if (env === "test") {
+  require("dotenv").config({
+    path: path.resolve(__dirname, "../../.env.test"),
+  });
 } else {
-  require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
+  require("dotenv").config({ path: path.resolve(__dirname, "../../.env") });
 }
 
 const sequelize = new Sequelize(
@@ -23,8 +25,8 @@ const sequelize = new Sequelize(
   {
     host: process.env.DB_HOST,
     port: process.env.DB_PORT || 5432,
-    dialect: 'postgres',
-    logging: env === 'development' ? console.log : false,
+    dialect: "postgres",
+    logging: env === "development" ? console.log : false,
   },
 );
 
@@ -32,8 +34,14 @@ const db = {};
 
 // Charger chaque modèle
 const modelFiles = [
-  'User', 'Chantier', 'Equipe', 'Competence',
-  'Affectation', 'CompetenceChantier', 'CompetenceUser', 'EquipeUser',
+  "User",
+  "Chantier",
+  "Equipe",
+  "Competence",
+  "Affectation",
+  "CompetenceChantier",
+  "CompetenceUser",
+  "EquipeUser",
 ];
 
 modelFiles.forEach((file) => {

@@ -1,12 +1,12 @@
 /**
  * Tests unitaires du service Chantier.
  */
-const { Op } = require('sequelize');
-
 // Mock des modèles
-jest.mock('../../src/models', () => {
+jest.mock("../../src/models", () => {
+  const { Op } = jest.requireActual("sequelize");
   const mockAffectation = {
     findOne: jest.fn(),
+    count: jest.fn(),
   };
   const mockCompetenceChantier = {
     findAll: jest.fn(),
@@ -32,42 +32,42 @@ jest.mock('../../src/models', () => {
   };
 });
 
-const chantierService = require('../../src/services/chantierService');
+const chantierService = require("../../src/services/chantierService");
 const {
   Affectation,
   CompetenceChantier,
   EquipeUser,
   Chantier,
-} = require('../../src/models');
+} = require("../../src/models");
 
-describe('ChantierService', () => {
+describe("ChantierService", () => {
   afterEach(() => jest.clearAllMocks());
 
-  describe('hasDateOverlap', () => {
-    it('retourne true si chevauchement détecté', async () => {
+  describe("hasDateOverlap", () => {
+    it("retourne true si chevauchement détecté", async () => {
       Affectation.findOne.mockResolvedValue({ id: 1 });
       const result = await chantierService.hasDateOverlap(
         1,
-        '2025-01-01',
-        '2025-06-30',
+        "2025-01-01",
+        "2025-06-30",
       );
       expect(result).toBe(true);
       expect(Affectation.findOne).toHaveBeenCalledTimes(1);
     });
 
-    it('retourne false si aucun chevauchement', async () => {
+    it("retourne false si aucun chevauchement", async () => {
       Affectation.findOne.mockResolvedValue(null);
       const result = await chantierService.hasDateOverlap(
         1,
-        '2025-01-01',
-        '2025-06-30',
+        "2025-01-01",
+        "2025-06-30",
       );
       expect(result).toBe(false);
     });
   });
 
-  describe('equipeHasRequiredCompetences', () => {
-    it('retourne true si l\'équipe a toutes les compétences requises', async () => {
+  describe("equipeHasRequiredCompetences", () => {
+    it("retourne true si l'équipe a toutes les compétences requises", async () => {
       EquipeUser.findAll.mockResolvedValue([
         { utilisateurId: 1 },
         { utilisateurId: 2 },
@@ -78,7 +78,7 @@ describe('ChantierService', () => {
       ]);
 
       // Mock CompetenceUser via require
-      const db = require('../../src/models');
+      const db = require("../../src/models");
       db.CompetenceUser = {
         findAll: jest
           .fn()
@@ -86,31 +86,31 @@ describe('ChantierService', () => {
       };
 
       const result = await chantierService.equipeHasRequiredCompetences(1, 1);
-      expect(typeof result).toBe('boolean');
+      expect(typeof result).toBe("boolean");
     });
   });
 
-  describe('createChantier', () => {
-    it('crée un chantier avec les bons paramètres', async () => {
-      const mockChantier = { id: 1, lieu: 'Paris' };
+  describe("createChantier", () => {
+    it("crée un chantier avec les bons paramètres", async () => {
+      const mockChantier = { id: 1, lieu: "Paris" };
       Chantier.create.mockResolvedValue(mockChantier);
       CompetenceChantier.create.mockResolvedValue({});
 
       const result = await chantierService.createChantier(
         {
-          lieu: 'Paris',
-          dateDebut: '2025-01-01',
-          dateFin: '2025-06-30',
-          status: 'en_cours',
+          lieu: "Paris",
+          dateDebut: "2025-01-01",
+          dateFin: "2025-06-30",
+          status: "en_cours",
         },
         [1, 2],
       );
 
       expect(Chantier.create).toHaveBeenCalledWith({
-        lieu: 'Paris',
-        dateDebut: '2025-01-01',
-        dateFin: '2025-06-30',
-        status: 'en_cours',
+        lieu: "Paris",
+        dateDebut: "2025-01-01",
+        dateFin: "2025-06-30",
+        status: "en_cours",
       });
       expect(CompetenceChantier.create).toHaveBeenCalledTimes(2);
       expect(result).toEqual(mockChantier);
