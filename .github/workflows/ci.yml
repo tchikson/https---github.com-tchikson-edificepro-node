@@ -97,7 +97,7 @@ jobs:
           driver: docker
 
       - name: Build and start containers
-        run: docker compose -f compose.yaml up -d --build --wait --wait-timeout 120
+        run: docker compose -f compose.yaml up -d --build --wait --wait-timeout 180
 
       - name: Show logs on failure
         if: failure()
