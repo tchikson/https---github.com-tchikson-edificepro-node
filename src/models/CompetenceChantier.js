@@ -3,11 +3,11 @@
  *
  * Indique quelles compétences sont requises pour un chantier donné.
  */
-const { DataTypes } = require("sequelize");
+const { DataTypes } = require('sequelize');
 
 module.exports = (sequelize) => {
   const CompetenceChantier = sequelize.define(
-    "CompetenceChantier",
+    'CompetenceChantier',
     {
       id: {
         type: DataTypes.INTEGER,
@@ -17,28 +17,28 @@ module.exports = (sequelize) => {
       chantierId: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        field: "chantier_id",
+        field: 'chantier_id',
       },
       competenceId: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        field: "competence_id",
+        field: 'competence_id',
       },
     },
     {
-      tableName: "competence_chantiers",
+      tableName: 'competence_chantiers',
       timestamps: true,
     },
   );
 
   CompetenceChantier.associate = (models) => {
     CompetenceChantier.belongsTo(models.Chantier, {
-      foreignKey: "chantierId",
-      as: "chantier",
+      foreignKey: 'chantierId',
+      as: 'chantier',
     });
     CompetenceChantier.belongsTo(models.Competence, {
-      foreignKey: "competenceId",
-      as: "competence",
+      foreignKey: 'competenceId',
+      as: 'competence',
     });
   };
 

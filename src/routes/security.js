@@ -1,10 +1,10 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
-const { verifyCsrfToken } = require("../middleware/csrf");
-const securityController = require("../controllers/securityController");
+const { verifyCsrfToken } = require('../middleware/csrf');
+const securityController = require('../controllers/securityController');
 
-router.get("/login", securityController.loginForm);
-router.post("/login", verifyCsrfToken, securityController.login);
-router.get("/logout", securityController.logout);
+router.get('/login', securityController.loginForm);
+router.post('/login', verifyCsrfToken, securityController.login);
+router.get('/logout', securityController.logout);
 
 module.exports = router;

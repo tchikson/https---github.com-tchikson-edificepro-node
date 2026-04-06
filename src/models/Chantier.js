@@ -4,11 +4,11 @@
  * Un chantier possède un lieu, des dates de début/fin, un statut (en_cours, en_pause, termine),
  * des compétences requises (via CompetenceChantier) et des affectations d'équipes (via Affectation).
  */
-const { DataTypes } = require("sequelize");
+const { DataTypes } = require('sequelize');
 
 module.exports = (sequelize) => {
   const Chantier = sequelize.define(
-    "Chantier",
+    'Chantier',
     {
       id: {
         type: DataTypes.INTEGER,
@@ -18,26 +18,26 @@ module.exports = (sequelize) => {
       lieu: {
         type: DataTypes.STRING(255),
         allowNull: false,
-        validate: { notEmpty: { msg: "Le lieu du chantier est obligatoire." } },
+        validate: { notEmpty: { msg: 'Le lieu du chantier est obligatoire.' } },
       },
       dateDebut: {
         type: DataTypes.DATE,
         allowNull: false,
-        field: "date_debut",
+        field: 'date_debut',
       },
       dateFin: {
         type: DataTypes.DATE,
         allowNull: false,
-        field: "date_fin",
+        field: 'date_fin',
       },
       status: {
-        type: DataTypes.ENUM("en_cours", "en_pause", "termine"),
+        type: DataTypes.ENUM('en_cours', 'en_pause', 'termine'),
         allowNull: false,
-        defaultValue: "en_cours",
+        defaultValue: 'en_cours',
       },
     },
     {
-      tableName: "chantiers",
+      tableName: 'chantiers',
       timestamps: true,
       validate: {
         dateFinAfterDebut() {
@@ -47,7 +47,7 @@ module.exports = (sequelize) => {
             this.dateFin <= this.dateDebut
           ) {
             throw new Error(
-              "La date de fin doit être postérieure à la date de début.",
+              'La date de fin doit être postérieure à la date de début.',
             );
           }
         },
@@ -57,14 +57,14 @@ module.exports = (sequelize) => {
 
   Chantier.associate = (models) => {
     Chantier.hasMany(models.CompetenceChantier, {
-      foreignKey: "chantierId",
-      as: "competenceChantiers",
-      onDelete: "CASCADE",
+      foreignKey: 'chantierId',
+      as: 'competenceChantiers',
+      onDelete: 'CASCADE',
     });
     Chantier.hasMany(models.Affectation, {
-      foreignKey: "chantierId",
-      as: "affectations",
-      onDelete: "CASCADE",
+      foreignKey: 'chantierId',
+      as: 'affectations',
+      onDelete: 'CASCADE',
     });
   };
 

@@ -4,11 +4,11 @@
  * Une équipe possède un nom, un chef d'équipe (User), des membres (via EquipeUser)
  * et peut être affectée à des chantiers (via Affectation).
  */
-const { DataTypes } = require("sequelize");
+const { DataTypes } = require('sequelize');
 
 module.exports = (sequelize) => {
   const Equipe = sequelize.define(
-    "Equipe",
+    'Equipe',
     {
       id: {
         type: DataTypes.INTEGER,
@@ -18,26 +18,26 @@ module.exports = (sequelize) => {
       nomEquipe: {
         type: DataTypes.STRING(255),
         allowNull: false,
-        field: "nom_equipe",
+        field: 'nom_equipe',
       },
       chefEquipeId: {
         type: DataTypes.INTEGER,
         allowNull: true,
-        field: "chef_equipe_id",
+        field: 'chef_equipe_id',
       },
       dateDebut: {
         type: DataTypes.DATE,
         allowNull: false,
-        field: "date_debut",
+        field: 'date_debut',
       },
       dateFin: {
         type: DataTypes.DATE,
         allowNull: false,
-        field: "date_fin",
+        field: 'date_fin',
       },
     },
     {
-      tableName: "equipes",
+      tableName: 'equipes',
       timestamps: true,
       validate: {
         dateFinAfterDebut() {
@@ -47,7 +47,7 @@ module.exports = (sequelize) => {
             this.dateFin <= this.dateDebut
           ) {
             throw new Error(
-              "La date de fin doit être postérieure à la date de début.",
+              'La date de fin doit être postérieure à la date de début.',
             );
           }
         },
@@ -57,16 +57,16 @@ module.exports = (sequelize) => {
 
   Equipe.associate = (models) => {
     Equipe.belongsTo(models.User, {
-      foreignKey: "chefEquipeId",
-      as: "chefEquipe",
+      foreignKey: 'chefEquipeId',
+      as: 'chefEquipe',
     });
     Equipe.hasMany(models.EquipeUser, {
-      foreignKey: "equipeId",
-      as: "equipeUsers",
+      foreignKey: 'equipeId',
+      as: 'equipeUsers',
     });
     Equipe.hasMany(models.Affectation, {
-      foreignKey: "equipeId",
-      as: "affectations",
+      foreignKey: 'equipeId',
+      as: 'affectations',
     });
   };
 

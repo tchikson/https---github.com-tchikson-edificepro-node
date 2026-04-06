@@ -1,7 +1,7 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
-const legalController = require("../controllers/legalController");
+const legalController = require('../controllers/legalController');
 
-router.get("/mentions-legales", legalController.mentionsLegales);
+router.get('/mentions-legales', legalController.mentionsLegales);
 
 module.exports = router;

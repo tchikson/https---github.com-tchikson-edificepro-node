@@ -3,7 +3,7 @@
  *
  * Génère un token par session et le vérifie sur les requêtes POST/PUT/DELETE.
  */
-const crypto = require("crypto");
+const crypto = require('crypto');
 
 /**
  * Génère un token CSRF et le stocke en session.
@@ -11,7 +11,7 @@ const crypto = require("crypto");
  */
 function generateCsrfToken(req, res, next) {
   if (!req.session.csrfToken) {
-    req.session.csrfToken = crypto.randomBytes(32).toString("hex");
+    req.session.csrfToken = crypto.randomBytes(32).toString('hex');
   }
   res.locals.csrfToken = function () {
     return req.session.csrfToken;
@@ -30,12 +30,12 @@ function verifyCsrfToken(req, res, next) {
     !submittedToken ||
     !storedToken ||
     !crypto.timingSafeEqual(
-      Buffer.from(submittedToken, "utf8"),
-      Buffer.from(storedToken, "utf8"),
+      Buffer.from(submittedToken, 'utf8'),
+      Buffer.from(storedToken, 'utf8'),
     )
   ) {
-    req.flash("error", "Token CSRF invalide.");
-    return res.redirect("back");
+    req.flash('error', 'Token CSRF invalide.');
+    return res.redirect('back');
   }
   next();
 }

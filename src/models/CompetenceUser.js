@@ -3,11 +3,11 @@
  *
  * Indique quelles compétences possède un utilisateur donné.
  */
-const { DataTypes } = require("sequelize");
+const { DataTypes } = require('sequelize');
 
 module.exports = (sequelize) => {
   const CompetenceUser = sequelize.define(
-    "CompetenceUser",
+    'CompetenceUser',
     {
       id: {
         type: DataTypes.INTEGER,
@@ -17,28 +17,28 @@ module.exports = (sequelize) => {
       utilisateurId: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        field: "utilisateur_id",
+        field: 'utilisateur_id',
       },
       competenceId: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        field: "competence_id",
+        field: 'competence_id',
       },
     },
     {
-      tableName: "competence_users",
+      tableName: 'competence_users',
       timestamps: true,
     },
   );
 
   CompetenceUser.associate = (models) => {
     CompetenceUser.belongsTo(models.User, {
-      foreignKey: "utilisateurId",
-      as: "utilisateur",
+      foreignKey: 'utilisateurId',
+      as: 'utilisateur',
     });
     CompetenceUser.belongsTo(models.Competence, {
-      foreignKey: "competenceId",
-      as: "competence",
+      foreignKey: 'competenceId',
+      as: 'competence',
     });
   };
 

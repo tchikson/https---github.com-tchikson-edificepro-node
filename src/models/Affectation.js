@@ -3,11 +3,11 @@
  *
  * Fait le lien entre une Equipe et un Chantier avec des dates de début et de fin.
  */
-const { DataTypes } = require("sequelize");
+const { DataTypes } = require('sequelize');
 
 module.exports = (sequelize) => {
   const Affectation = sequelize.define(
-    "Affectation",
+    'Affectation',
     {
       id: {
         type: DataTypes.INTEGER,
@@ -17,38 +17,38 @@ module.exports = (sequelize) => {
       equipeId: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        field: "equipe_id",
+        field: 'equipe_id',
       },
       chantierId: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        field: "chantier_id",
+        field: 'chantier_id',
       },
       dateDebut: {
         type: DataTypes.DATE,
         allowNull: false,
-        field: "date_debut",
+        field: 'date_debut',
       },
       dateFin: {
         type: DataTypes.DATE,
         allowNull: false,
-        field: "date_fin",
+        field: 'date_fin',
       },
     },
     {
-      tableName: "affectations",
+      tableName: 'affectations',
       timestamps: true,
     },
   );
 
   Affectation.associate = (models) => {
     Affectation.belongsTo(models.Equipe, {
-      foreignKey: "equipeId",
-      as: "equipe",
+      foreignKey: 'equipeId',
+      as: 'equipe',
     });
     Affectation.belongsTo(models.Chantier, {
-      foreignKey: "chantierId",
-      as: "chantier",
+      foreignKey: 'chantierId',
+      as: 'chantier',
     });
   };
 

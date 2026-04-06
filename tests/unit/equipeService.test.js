@@ -2,7 +2,7 @@
  * Tests unitaires du service Equipe.
  */
 
-jest.mock("../../src/models", () => {
+jest.mock('../../src/models', () => {
   const mockEquipeUser = {
     findOne: jest.fn(),
     findAll: jest.fn(),
@@ -24,66 +24,66 @@ jest.mock("../../src/models", () => {
   };
 });
 
-const equipeService = require("../../src/services/equipeService");
-const { EquipeUser, Equipe, Affectation } = require("../../src/models");
+const equipeService = require('../../src/services/equipeService');
+const { EquipeUser, Equipe, Affectation } = require('../../src/models');
 
-describe("EquipeService", () => {
+describe('EquipeService', () => {
   afterEach(() => jest.clearAllMocks());
 
-  describe("findConflictingAssignment", () => {
-    it("retourne null si aucun conflit", async () => {
+  describe('findConflictingAssignment', () => {
+    it('retourne null si aucun conflit', async () => {
       EquipeUser.findOne.mockResolvedValue(null);
       const result = await equipeService.findConflictingAssignment(
         1,
-        "2025-01-01",
-        "2025-06-30",
+        '2025-01-01',
+        '2025-06-30',
         null,
       );
       expect(result).toBeNull();
     });
 
-    it("retourne le conflit si existant", async () => {
+    it('retourne le conflit si existant', async () => {
       const conflict = { id: 5, equipeId: 3 };
       EquipeUser.findOne.mockResolvedValue(conflict);
       const result = await equipeService.findConflictingAssignment(
         1,
-        "2025-01-01",
-        "2025-06-30",
+        '2025-01-01',
+        '2025-06-30',
         null,
       );
       expect(result).toEqual(conflict);
     });
   });
 
-  describe("createEquipe", () => {
-    it("crée une équipe avec les bons paramètres", async () => {
-      const mockEquipe = { id: 1, nomEquipe: "Alpha" };
+  describe('createEquipe', () => {
+    it('crée une équipe avec les bons paramètres', async () => {
+      const mockEquipe = { id: 1, nomEquipe: 'Alpha' };
       Equipe.create.mockResolvedValue(mockEquipe);
       EquipeUser.create.mockResolvedValue({});
 
       const result = await equipeService.createEquipe(
         {
-          nomEquipe: "Alpha",
+          nomEquipe: 'Alpha',
           chefEquipeId: 1,
-          dateDebut: "2025-01-01",
-          dateFin: "2025-06-30",
+          dateDebut: '2025-01-01',
+          dateFin: '2025-06-30',
         },
         [2, 3],
       );
 
       expect(Equipe.create).toHaveBeenCalledWith({
-        nomEquipe: "Alpha",
+        nomEquipe: 'Alpha',
         chefEquipeId: 1,
-        dateDebut: "2025-01-01",
-        dateFin: "2025-06-30",
+        dateDebut: '2025-01-01',
+        dateFin: '2025-06-30',
       });
       expect(EquipeUser.create).toHaveBeenCalledTimes(2);
       expect(result).toEqual(mockEquipe);
     });
   });
 
-  describe("deleteEquipe", () => {
-    it("supprime équipe et relations en cascade", async () => {
+  describe('deleteEquipe', () => {
+    it('supprime équipe et relations en cascade', async () => {
       const mockEquipe = { id: 1, destroy: jest.fn() };
       Equipe.findByPk.mockResolvedValue(mockEquipe);
       EquipeUser.destroy.mockResolvedValue(2);
