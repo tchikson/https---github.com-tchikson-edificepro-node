@@ -1,0 +1,147 @@
+<div class="container mt-5 d-flex justify-content-center">
+    <div class="glassmorphism-card shadow-lg p-5">
+        <div class="glassmorphism-header text-center">
+            <h2>👤 Modifier l'Utilisateur</h2>
+        </div>
+
+        <% if (isAssignedToEquipe) { %>
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle"></i> Cet utilisateur est affecté à une équipe. Les compétences ne
+                peuvent pas être modifiées.
+            </div>
+            <% } %>
+
+                <form action="/user/<%= userProfile.id %>/edit" method="post">
+                    <input type="hidden" name="_csrf" value="<%= typeof csrfToken === 'function' ? csrfToken() : '' %>">
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold"><i class="fas fa-user"></i> Nom</label>
+                        <input type="text" name="nom" class="form-control custom-input" value="<%= userProfile.nom %>"
+                            required>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold"><i class="fas fa-user"></i> Prénom</label>
+                        <input type="text" name="prenom" class="form-control custom-input"
+                            value="<%= userProfile.prenom %>" required>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold"><i class="fas fa-envelope"></i> Email</label>
+                        <input type="email" name="email" class="form-control custom-input"
+                            value="<%= userProfile.email %>" required>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold"><i class="fas fa-lock"></i> Nouveau mot de passe
+                            (optionnel)</label>
+                        <input type="password" name="password" class="form-control custom-input"
+                            placeholder="Laisser vide pour ne pas changer">
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold"><i class="fas fa-user-tag"></i> Rôle</label>
+                        <select name="roles" class="form-select custom-select">
+                            <option value="ROLE_USER" <%=userProfile.roles.includes('ROLE_USER') &&
+                                !userProfile.roles.includes('ROLE_ADMIN') ? 'selected' : '' %>>👤 Utilisateur</option>
+                            <option value="ROLE_ADMIN" <%=userProfile.roles.includes('ROLE_ADMIN') ? 'selected' : '' %>
+                                >👑 Administrateur</option>
+                        </select>
+                    </div>
+
+                    <% if (!isAssignedToEquipe) { %>
+                        <div class="mb-4">
+                            <label class="form-label fw-bold"><i class="fas fa-cogs"></i> Compétences</label>
+                            <div class="card p-3 glassmorphism-subcard">
+                                <div class="row">
+                                    <% competences.forEach(function(comp) { %>
+                                        <% var isChecked=userProfile.competenceUsers &&
+                                            userProfile.competenceUsers.some(function(cu) { return
+                                            cu.competenceId===comp.id; }); %>
+                                            <div class="col-md-4">
+                                                <div class="form-check">
+                                                    <input type="checkbox" name="competences" value="<%= comp.id %>"
+                                                        class="form-check-input" id="comp_<%= comp.id %>" <%=isChecked
+                                                        ? 'checked' : '' %>>
+                                                    <label class="form-check-label" for="comp_<%= comp.id %>">
+                                                        <%= comp.nomCompetence %>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <% }); %>
+                                </div>
+                            </div>
+                        </div>
+                        <% } %>
+
+                            <div class="text-center mt-4">
+                                <button type="submit" class="btn btn-glass btn-lg"><i class="fas fa-save"></i> Mettre à
+                                    jour</button>
+                                <a href="/user/list" class="btn btn-outline-secondary ms-3"><i
+                                        class="fas fa-arrow-left"></i> Retour</a>
+                            </div>
+                </form>
+
+                <% if (currentUser.id !==userProfile.id && !userProfile.hasRole('ROLE_ADMIN')) { %>
+                    <div class="text-center mt-3">
+                        <form action="/user/<%= userProfile.id %>/delete" method="POST"
+                            onsubmit="return confirm('Supprimer cet utilisateur ?');">
+                            <input type="hidden" name="_csrf"
+                                value="<%= typeof csrfToken === 'function' ? csrfToken() : '' %>">
+                            <button class="btn btn-danger"><i class="fas fa-trash"></i> Supprimer</button>
+                        </form>
+                    </div>
+                    <% } %>
+    </div>
+</div>
+
+<style>
+    .glassmorphism-card {
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(15px);
+        border-radius: 25px;
+        padding: 50px;
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+        max-width: 700px;
+        width: 100%;
+    }
+
+    .glassmorphism-header {
+        font-size: 28px;
+        font-weight: bold;
+        background: rgba(0, 123, 255, 0.2);
+        padding: 15px;
+        border-radius: 20px;
+        margin-bottom: 25px;
+    }
+
+    .custom-input,
+    .custom-select {
+        border-radius: 12px;
+        padding: 14px;
+        font-size: 16px;
+        background: rgba(255, 255, 255, 0.5);
+        width: 100%;
+    }
+
+    .glassmorphism-subcard {
+        background: rgba(255, 255, 255, 0.3);
+        backdrop-filter: blur(8px);
+        border-radius: 15px;
+        padding: 20px;
+    }
+
+    .form-check-input {
+        transform: scale(1.3);
+        margin-right: 10px;
+    }
+
+    .btn-glass {
+        background: linear-gradient(45deg, #007bff, #00d4ff);
+        border: none;
+        color: white;
+        padding: 14px 24px;
+        border-radius: 30px;
+        font-weight: bold;
+    }
+</style>

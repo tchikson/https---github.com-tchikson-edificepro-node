@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        <%= typeof title !=='undefined' ? title : 'ÉdificePro' %>
+    </title>
+
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <!-- Material Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <!-- Select2 -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet">
+    <!-- Frappe Gantt -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/frappe-gantt/0.5.0/frappe-gantt.min.css">
+    <!-- App CSS -->
+    <link rel="stylesheet" href="/css/app.css">
+</head>
+
+<body class="bg-white">
+
+    <% if (currentUser) { %>
+        <nav class="navbar navbar-expand-lg navbar-light bg-white">
+            <div class="container">
+                <a class="navbar-brand" href="<%= currentUser.hasRole('ROLE_ADMIN') ? '/admin' : '/dashboard' %>">
+                    ÉdificePro
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto">
+                        <% if (currentUser.hasRole('ROLE_ADMIN')) { %>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/equipe">Gestion équipes</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/chantier">Gestion chantiers</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/competence">Gestion compétences</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/user/list">Gestion utilisateurs</a>
+                            </li>
+                            <% } %>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="/dashboard">Dashboard</a>
+                                </li>
+                    </ul>
+
+                    <ul class="navbar-nav">
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                Compte
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <button type="button" class="dropdown-item btn btn-primary btn-sm rounded-0"
+                                        data-bs-toggle="modal" data-bs-target="#editProfileModal">
+                                        Modifier mon profil
+                                    </button>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item btn btn-danger btn-sm rounded-0"
+                                        href="/logout">Déconnexion</a>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        <% } %>
+
+            <% if (flashSuccess && flashSuccess.length> 0) { %>
+                <% flashSuccess.forEach(function(msg) { %>
+                    <div class="alert alert-success">
+                        <%= msg %>
+                    </div>
+                    <% }); %>
+                        <% } %>
+                            <% if (flashError && flashError.length> 0) { %>
+                                <% flashError.forEach(function(msg) { %>
+                                    <div class="alert alert-danger">
+                                        <%= msg %>
+                                    </div>
+                                    <% }); %>
+                                        <% } %>
+
+                                            <!-- Contenu principal -->
+                                            <main class="container my-4">
+                                                <%- body %>
+                                            </main>
+
+                                            <!-- Footer -->
+                                            <footer class="bg-light text-center text-muted py-3 mt-5 border-top">
+                                                <div class="container">
+                                                    <a href="/mentions-legales" class="text-muted text-decoration-none">
+                                                        Mentions légales &amp; Politique de confidentialité
+                                                    </a>
+                                                    <span class="mx-2">|</span>
+                                                    <span>&copy; <%= new Date().getFullYear() %> ÉdificePro</span>
+                                                </div>
+                                            </footer>
+
+                                            <!-- Modal de modification du profil -->
+                                            <div class="modal fade" id="editProfileModal" tabindex="-1"
+                                                aria-labelledby="editProfileModalLabel" aria-hidden="true">
+                                                <div class="modal-dialog modal-dialog-centered">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <button type="button" class="btn-close"
+                                                                data-bs-dismiss="modal" aria-label="Close"></button>
+                                                        </div>
+                                                        <div class="modal-body" id="modalContent">
+                                                            <div class="text-center">
+                                                                <i class="fas fa-spinner fa-spin"></i> Chargement...
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Scripts -->
+                                            <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+                                            <script
+                                                src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+                                            <script>
+                                                document.addEventListener("DOMContentLoaded", function () {
+                                                    const modal = document.getElementById("editProfileModal");
+                                                    if (modal) {
+                                                        modal.addEventListener("show.bs.modal", function () {
+                                                            fetch("/user/edit-modal")
+                                                                .then(response => response.text())
+                                                                .then(html => {
+                                                                    document.getElementById("modalContent").innerHTML = html;
+                                                                })
+                                                                .catch(error => {
+                                                                    document.getElementById("modalContent").innerHTML =
+                                                                        "<div class='alert alert-danger'>Erreur de chargement.</div>";
+                                                                });
+                                                        });
+                                                    }
+                                                });
+                                            </script>
+</body>
+
+</html>

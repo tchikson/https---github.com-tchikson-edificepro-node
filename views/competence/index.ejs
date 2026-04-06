@@ -1,0 +1,141 @@
+<div class="container mt-5">
+    <div class="glassmorphism-card shadow-lg p-4">
+        <h1 class="text-center text-primary mb-4"><i class="fas fa-cogs"></i> Gestion des Compétences</h1>
+
+        <div class="row mb-4 align-items-center">
+            <div class="col-md-6">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                    <input type="text" id="searchComp" class="form-control search-bar"
+                        placeholder="Rechercher une compétence...">
+                </div>
+            </div>
+            <div class="col-md-6 text-end">
+                <a href="/competence/new" class="btn btn-glass btn-lg"><i class="fas fa-plus"></i> Ajouter</a>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table custom-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nom de la Compétence</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (competences.length===0) { %>
+                        <tr>
+                            <td colspan="3" class="text-center text-muted">Aucune compétence trouvée</td>
+                        </tr>
+                        <% } else { %>
+                            <% competences.forEach(function(comp) { %>
+                                <tr class="comp-row">
+                                    <td><strong>
+                                            <%= comp.id %>
+                                        </strong></td>
+                                    <td class="comp-name">
+                                        <%= comp.nomCompetence %>
+                                    </td>
+                                    <td>
+                                        <a href="/competence/<%= comp.id %>" class="btn btn-action btn-view"
+                                            title="Voir"><i class="fas fa-eye"></i></a>
+                                        <a href="/competence/<%= comp.id %>/edit" class="btn btn-action btn-edit"
+                                            title="Modifier"><i class="fas fa-pencil-alt"></i></a>
+                                        <form method="post" action="/competence/<%= comp.id %>/delete"
+                                            onsubmit="return confirm('Supprimer cette compétence ?');" class="d-inline">
+                                            <input type="hidden" name="_csrf"
+                                                value="<%= typeof csrfToken === 'function' ? csrfToken() : '' %>">
+                                            <button class="btn btn-action btn-delete" title="Supprimer"><i
+                                                    class="fas fa-trash"></i></button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                <% }); %>
+                                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById("searchComp").addEventListener("input", function () {
+        var val = this.value.toLowerCase();
+        document.querySelectorAll(".comp-row").forEach(function (row) {
+            row.style.display = row.querySelector(".comp-name").textContent.toLowerCase().includes(val) ? "" : "none";
+        });
+    });
+</script>
+
+<style>
+    .glassmorphism-card {
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(10px);
+        border-radius: 15px;
+        padding: 30px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .custom-table th {
+        background: #111;
+        color: white;
+        text-align: center;
+        padding: 14px;
+        font-weight: bold;
+    }
+
+    .custom-table {
+        border-collapse: separate;
+        border-spacing: 0 8px;
+        width: 100%;
+    }
+
+    .custom-table td {
+        background: white;
+        padding: 12px;
+        text-align: center;
+        border-radius: 8px;
+    }
+
+    .btn-action {
+        border-radius: 50%;
+        padding: 8px;
+        margin: 2px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-view {
+        background: #17a2b8;
+        color: white;
+    }
+
+    .btn-edit {
+        background: #ffc107;
+        color: black;
+    }
+
+    .btn-delete {
+        background: #dc3545;
+        color: white;
+    }
+
+    .btn-action:hover {
+        transform: scale(1.1);
+    }
+
+    .search-bar {
+        border-radius: 30px;
+        padding: 12px;
+    }
+
+    .btn-glass {
+        background: linear-gradient(45deg, #007bff, #00d4ff);
+        border: none;
+        color: white;
+        padding: 12px 20px;
+        border-radius: 25px;
+        font-weight: bold;
+    }
+</style>

@@ -1,0 +1,215 @@
+<div class="container mt-5 d-flex justify-content-center">
+    <div class="glassmorphism-card shadow-lg p-5">
+        <div class="glassmorphism-header text-center">
+            <h2>👤 Gestion des Utilisateurs</h2>
+        </div>
+
+        <div class="row mb-4 align-items-center">
+            <div class="col-md-5">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                    <input type="text" id="searchUser" class="form-control search-bar"
+                        placeholder="Rechercher un utilisateur...">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <select id="filterRole" class="form-select custom-select">
+                    <option value="">🎭 Filtrer par rôle</option>
+                    <option value="ROLE_ADMIN">👑 Administrateur</option>
+                    <option value="ROLE_USER">👤 Utilisateur</option>
+                </select>
+            </div>
+            <div class="col-md-3 text-end">
+                <a href="/user/new" class="btn btn-glass btn-lg"><i class="fas fa-user-plus"></i> Ajouter</a>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table custom-table" id="userTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th><i class="fas fa-user"></i> Nom</th>
+                        <th><i class="fas fa-envelope"></i> Email</th>
+                        <th><i class="fas fa-user-tag"></i> Rôle</th>
+                        <th><i class="fas fa-cogs"></i> Compétences</th>
+                        <th><i class="fas fa-tools"></i> Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (users.length===0) { %>
+                        <tr>
+                            <td colspan="6" class="text-center text-muted">Aucun utilisateur trouvé</td>
+                        </tr>
+                        <% } else { %>
+                            <% users.forEach(function(user) { %>
+                                <tr class="user-row">
+                                    <td><strong>
+                                            <%= user.id %>
+                                        </strong></td>
+                                    <td class="user-name">
+                                        <%= user.nom %>
+                                            <%= user.prenom %>
+                                    </td>
+                                    <td>
+                                        <%= user.email %>
+                                    </td>
+                                    <td>
+                                        <% user.roles.forEach(function(role) { %>
+                                            <span
+                                                class="badge role-badge <%= role === 'ROLE_ADMIN' ? 'admin' : 'user' %>"
+                                                data-role="<%= role %>">
+                                                <%= role==='ROLE_ADMIN' ? '👑 Admin' : '👤 Utilisateur' %>
+                                            </span>
+                                            <% }); %>
+                                    </td>
+                                    <td>
+                                        <% if (user.competenceUsers && user.competenceUsers.length> 0) { %>
+                                            <% user.competenceUsers.forEach(function(cu) { %>
+                                                <span class="badge competence-badge">
+                                                    <%= cu.competence ? cu.competence.nomCompetence : '' %>
+                                                </span>
+                                                <% }); %>
+                                                    <% } else { %>
+                                                        <em class="text-muted">Aucune compétence</em>
+                                                        <% } %>
+                                    </td>
+                                    <td>
+                                        <a href="/user/<%= user.id %>" class="btn btn-action btn-view" title="Voir"><i
+                                                class="fas fa-eye"></i></a>
+                                        <a href="/user/<%= user.id %>/edit" class="btn btn-action btn-edit"
+                                            title="Modifier"><i class="fas fa-pencil-alt"></i></a>
+                                    </td>
+                                </tr>
+                                <% }); %>
+                                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var searchUser = document.getElementById("searchUser");
+        var filterRole = document.getElementById("filterRole");
+        var rows = document.querySelectorAll(".user-row");
+
+        function filterTable() {
+            var searchValue = searchUser.value.toLowerCase();
+            var roleValue = filterRole.value;
+            rows.forEach(function (row) {
+                var name = row.querySelector(".user-name").textContent.toLowerCase();
+                var roleBadges = row.querySelectorAll(".role-badge");
+                var hasMatchingRole = roleValue === "" || Array.from(roleBadges).some(function (r) { return r.dataset.role === roleValue; });
+                row.style.display = (name.includes(searchValue) && hasMatchingRole) ? "" : "none";
+            });
+        }
+
+        searchUser.addEventListener("input", filterTable);
+        filterRole.addEventListener("change", filterTable);
+    });
+</script>
+
+<style>
+    .glassmorphism-card {
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(12px);
+        border-radius: 30px;
+        padding: 50px;
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+        max-width: 1200px;
+        width: 100%;
+    }
+
+    .glassmorphism-header {
+        font-size: 28px;
+        font-weight: bold;
+        background: rgba(0, 123, 255, 0.2);
+        padding: 20px;
+        border-radius: 20px;
+        margin-bottom: 25px;
+    }
+
+    .custom-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 10px;
+    }
+
+    .custom-table th {
+        background: #000;
+        color: white;
+        text-align: center;
+        padding: 16px;
+        font-weight: bold;
+    }
+
+    .custom-table td {
+        background: white;
+        padding: 14px;
+        text-align: center;
+        border-radius: 10px;
+    }
+
+    .role-badge {
+        padding: 10px 15px;
+        border-radius: 15px;
+        font-weight: bold;
+        margin-right: 8px;
+    }
+
+    .admin {
+        background: #ff5733;
+        color: white;
+    }
+
+    .user {
+        background: #007bff;
+        color: white;
+    }
+
+    .competence-badge {
+        background: #17a2b8;
+        color: white;
+        padding: 8px 12px;
+        border-radius: 12px;
+        margin: 2px;
+        display: inline-block;
+    }
+
+    .btn-action {
+        border-radius: 50%;
+        padding: 10px;
+        margin: 3px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-view {
+        background: #17a2b8;
+        color: white;
+    }
+
+    .btn-edit {
+        background: #ffc107;
+        color: black;
+    }
+
+    .btn-action:hover {
+        transform: scale(1.1);
+    }
+
+    .search-bar {
+        border-radius: 30px;
+        padding: 14px;
+    }
+
+    .btn-glass {
+        background: linear-gradient(45deg, #007bff, #00d4ff);
+        border: none;
+        color: white;
+        padding: 12px 20px;
+        border-radius: 25px;
+        font-weight: bold;
+    }
+</style>

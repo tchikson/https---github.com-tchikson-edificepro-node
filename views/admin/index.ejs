@@ -1,0 +1,36 @@
+<div class="container mt-4">
+    <div class="card shadow-lg p-4">
+        <h1 class="text-center text-primary mb-4"><i class="fas fa-shield-alt"></i> Panneau d'Administration</h1>
+        <p class="text-center text-muted">Bienvenue, <strong>
+                <%= currentUser.prenom %>
+                    <%= currentUser.nom %>
+            </strong></p>
+
+        <div class="row mt-4">
+            <div class="col-md-3 mb-3">
+                <a href="/user/list" class="card text-decoration-none text-center p-4 shadow-sm">
+                    <i class="fas fa-users fa-2x text-primary mb-2"></i>
+                    <h5>Utilisateurs</h5>
+                </a>
+            </div>
+            <div class="col-md-3 mb-3">
+                <a href="/equipe" class="card text-decoration-none text-center p-4 shadow-sm">
+                    <i class="fas fa-people-group fa-2x text-success mb-2"></i>
+                    <h5>Équipes</h5>
+                </a>
+            </div>
+            <div class="col-md-3 mb-3">
+                <a href="/chantier" class="card text-decoration-none text-center p-4 shadow-sm">
+                    <i class="fas fa-hard-hat fa-2x text-warning mb-2"></i>
+                    <h5>Chantiers</h5>
+                </a>
+            </div>
+            <div class="col-md-3 mb-3">
+                <a href="/competence" class="card text-decoration-none text-center p-4 shadow-sm">
+                    <i class="fas fa-cogs fa-2x text-info mb-2"></i>
+                    <h5>Compétences</h5>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

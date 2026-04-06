@@ -1,0 +1,129 @@
+<div class="container mt-5 d-flex justify-content-center">
+    <div class="glassmorphism-card shadow-lg p-4">
+        <div class="glassmorphism-header text-center">
+            <h2>👤 <%= userProfile.prenom %>
+                    <%= userProfile.nom %>
+            </h2>
+        </div>
+
+        <div class="glassmorphism-body">
+            <table class="table">
+                <tr>
+                    <th>ID</th>
+                    <td>
+                        <%= userProfile.id %>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Nom</th>
+                    <td>
+                        <%= userProfile.nom %>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Prénom</th>
+                    <td>
+                        <%= userProfile.prenom %>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Email</th>
+                    <td>
+                        <%= userProfile.email %>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Rôles</th>
+                    <td>
+                        <% userProfile.roles.forEach(function(role) { %>
+                            <span class="badge <%= role === 'ROLE_ADMIN' ? 'bg-danger' : 'bg-primary' %>">
+                                <%= role==='ROLE_ADMIN' ? 'Admin' : 'Utilisateur' %>
+                            </span>
+                            <% }); %>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Compétences</th>
+                    <td>
+                        <% if (userProfile.competenceUsers && userProfile.competenceUsers.length> 0) { %>
+                            <% userProfile.competenceUsers.forEach(function(cu) { %>
+                                <span class="badge competence-badge">
+                                    <%= cu.competence ? cu.competence.nomCompetence : '' %>
+                                </span>
+                                <% }); %>
+                                    <% } else { %>
+                                        <em class="text-muted">Aucune compétence</em>
+                                        <% } %>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Équipes</th>
+                    <td>
+                        <% if (userProfile.equipeUsers && userProfile.equipeUsers.length> 0) { %>
+                            <% userProfile.equipeUsers.forEach(function(eu) { %>
+                                <span class="badge bg-info">
+                                    <%= eu.equipe ? eu.equipe.nomEquipe : '' %>
+                                </span>
+                                <% }); %>
+                                    <% } else { %>
+                                        <em class="text-muted">Aucune équipe</em>
+                                        <% } %>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="text-center mt-4 d-flex justify-content-center gap-3">
+            <a href="/user/list" class="btn btn-outline-secondary btn-lg"><i class="fas fa-arrow-left"></i> Retour</a>
+            <a href="/user/<%= userProfile.id %>/edit" class="btn btn-warning btn-lg"><i class="fas fa-edit"></i>
+                Modifier</a>
+            <% if (currentUser.id !==userProfile.id && !userProfile.hasRole('ROLE_ADMIN')) { %>
+                <form action="/user/<%= userProfile.id %>/delete" method="POST"
+                    onsubmit="return confirm('Supprimer cet utilisateur ?');">
+                    <input type="hidden" name="_csrf" value="<%= typeof csrfToken === 'function' ? csrfToken() : '' %>">
+                    <button class="btn btn-danger btn-lg"><i class="fas fa-trash"></i> Supprimer</button>
+                </form>
+                <% } %>
+        </div>
+    </div>
+</div>
+
+<style>
+    .glassmorphism-card {
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(12px);
+        border-radius: 25px;
+        padding: 40px;
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+        max-width: 800px;
+        width: 100%;
+    }
+
+    .glassmorphism-header {
+        font-size: 28px;
+        font-weight: bold;
+        background: rgba(0, 123, 255, 0.2);
+        padding: 15px;
+        border-radius: 20px;
+        margin-bottom: 25px;
+    }
+
+    .glassmorphism-body {
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 15px;
+        padding: 20px;
+    }
+
+    .competence-badge {
+        background: #17a2b8;
+        color: white;
+        padding: 8px 12px;
+        border-radius: 12px;
+        margin: 2px;
+        display: inline-block;
+    }
+
+    .d-flex.gap-3 {
+        gap: 15px;
+    }
+</style>

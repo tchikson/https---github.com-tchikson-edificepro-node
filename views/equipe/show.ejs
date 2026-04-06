@@ -1,0 +1,132 @@
+<div class="container mt-5 d-flex justify-content-center">
+    <div class="glassmorphism-card shadow-lg p-4">
+        <div class="glassmorphism-header text-center">
+            <h2>👥 <%= equipe.nomEquipe %>
+            </h2>
+        </div>
+
+        <div class="glassmorphism-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h4 class="text-secondary"><i class="fas fa-info-circle"></i> Informations Générales</h4>
+                    <ul class="list-group custom-list">
+                        <li><strong>ID:</strong>
+                            <%= equipe.id %>
+                        </li>
+                        <li><strong>Nom de l'équipe:</strong>
+                            <%= equipe.nomEquipe %>
+                        </li>
+                        <li><strong>Chef d'équipe:</strong>
+                            <% if (equipe.chefEquipe) { %>
+                                <span class="badge badge-chef">
+                                    <%= equipe.chefEquipe.nom %>
+                                        <%= equipe.chefEquipe.prenom %>
+                                </span>
+                                <% } else { %>
+                                    <span class="text-muted">Aucun chef d'équipe</span>
+                                    <% } %>
+                        </li>
+                        <li><strong>Date de début:</strong>
+                            <%= equipe.dateDebut ? new Date(equipe.dateDebut).toLocaleDateString('fr-FR') : 'N/A' %>
+                        </li>
+                        <li><strong>Date de fin:</strong>
+                            <%= equipe.dateFin ? new Date(equipe.dateFin).toLocaleDateString('fr-FR') : 'N/A' %>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="col-md-6">
+                    <h4 class="text-secondary"><i class="fas fa-users"></i> Membres Affectés</h4>
+                    <% if (equipe.equipeUsers && equipe.equipeUsers.length> 0) { %>
+                        <ul class="list-group custom-list">
+                            <% equipe.equipeUsers.forEach(function(eu) { %>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span><i class="fas fa-user"></i>
+                                        <%= eu.utilisateur ? eu.utilisateur.nom + ' ' + eu.utilisateur.prenom
+                                            : 'Inconnu' %>
+                                    </span>
+                                    <span class="badge badge-membre">Affecté</span>
+                                </li>
+                                <% }); %>
+                        </ul>
+                        <% } else { %>
+                            <p class="text-muted">Aucun membre affecté à cette équipe.</p>
+                            <% } %>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-4">
+            <a href="/equipe" class="btn btn-outline-secondary btn-glass"><i class="fas fa-arrow-left"></i> Retour</a>
+            <a href="/equipe/<%= equipe.id %>/edit" class="btn btn-warning btn-glass"><i class="fas fa-edit"></i>
+                Modifier</a>
+            <form action="/equipe/<%= equipe.id %>/delete" method="POST"
+                onsubmit="return confirm('Voulez-vous supprimer cette équipe ?');" class="d-inline">
+                <input type="hidden" name="_csrf" value="<%= typeof csrfToken === 'function' ? csrfToken() : '' %>">
+                <button class="btn btn-danger btn-lg"><i class="fas fa-trash"></i> Supprimer</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .glassmorphism-card {
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        max-width: 850px;
+        width: 100%;
+    }
+
+    .glassmorphism-header {
+        font-size: 24px;
+        font-weight: bold;
+        background: rgba(0, 123, 255, 0.2);
+        padding: 15px;
+        border-radius: 15px;
+        margin-bottom: 20px;
+    }
+
+    .glassmorphism-body {
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 15px;
+        padding: 20px;
+    }
+
+    .custom-list {
+        list-style: none;
+        padding: 0;
+    }
+
+    .custom-list li {
+        padding: 10px;
+        background: rgba(255, 255, 255, 0.2);
+        margin-bottom: 8px;
+        border-radius: 10px;
+        font-weight: 500;
+    }
+
+    .badge-chef {
+        background: #007bff;
+        color: white;
+        padding: 5px 10px;
+        border-radius: 10px;
+    }
+
+    .badge-membre {
+        background: #17a2b8;
+        color: white;
+        padding: 5px 10px;
+        border-radius: 10px;
+    }
+
+    .btn-glass {
+        border: none;
+        padding: 12px 20px;
+        border-radius: 25px;
+        font-weight: bold;
+        margin: 5px;
+    }
+</style>

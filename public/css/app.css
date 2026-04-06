@@ -1,0 +1,250 @@
+/* ================================================================
+   ÉdificePro — Styles globaux (glassmorphism + Bootstrap 5 overrides)
+   ================================================================ */
+
+:root {
+  --glass-bg: rgba(255, 255, 255, 0.15);
+  --glass-border: rgba(255, 255, 255, 0.25);
+  --glass-shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
+  --glass-blur: 12px;
+  --primary: #667eea;
+  --primary-dark: #5a67d8;
+  --gradient-bg: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --gradient-light: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+}
+
+/* --- Corps & Fond --- */
+body {
+  font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background: var(--gradient-light);
+  min-height: 100vh;
+}
+
+/* --- Navbar --- */
+.navbar {
+  background: var(--gradient-bg) !important;
+  backdrop-filter: blur(var(--glass-blur));
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+}
+.navbar-brand {
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+.nav-link {
+  font-weight: 500;
+  transition: opacity 0.2s;
+}
+.nav-link:hover {
+  opacity: 0.85;
+}
+
+/* --- Cartes glassmorphism --- */
+.glass-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  box-shadow: var(--glass-shadow);
+  padding: 2rem;
+}
+
+.card {
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+}
+
+/* --- Boutons --- */
+.btn-primary {
+  background: var(--gradient-bg);
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  padding: 0.5rem 1.2rem;
+  transition: opacity 0.2s, transform 0.2s;
+}
+.btn-primary:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+  background: var(--gradient-bg);
+}
+
+.btn-outline-primary {
+  border-color: var(--primary);
+  color: var(--primary);
+  border-radius: 8px;
+  font-weight: 500;
+}
+.btn-outline-primary:hover {
+  background: var(--primary);
+  border-color: var(--primary);
+}
+
+/* --- Tables --- */
+.table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+.table thead th {
+  background: var(--gradient-bg);
+  color: #fff;
+  border: none;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+.table thead th:first-child {
+  border-radius: 8px 0 0 0;
+}
+.table thead th:last-child {
+  border-radius: 0 8px 0 0;
+}
+.table tbody tr {
+  transition: background 0.15s;
+}
+.table tbody tr:hover {
+  background: rgba(102, 126, 234, 0.05);
+}
+
+/* --- Badges --- */
+.badge {
+  font-weight: 500;
+  letter-spacing: 0.3px;
+  padding: 0.4em 0.7em;
+}
+
+/* --- Formulaires --- */
+.form-control, .form-select {
+  border-radius: 8px;
+  border: 1px solid #dee2e6;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.form-control:focus, .form-select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+.form-check-input:checked {
+  background-color: var(--primary);
+  border-color: var(--primary);
+}
+
+/* --- Page de login --- */
+.login-card {
+  max-width: 900px;
+  margin: 5vh auto;
+  overflow: hidden;
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+}
+.login-card .card-body {
+  padding: 3rem;
+}
+.login-image {
+  background: var(--gradient-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  min-height: 300px;
+}
+
+/* --- Dashboard / Gantt --- */
+.gantt-container {
+  overflow-x: auto;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+}
+.gantt .bar {
+  border-radius: 6px;
+}
+.gantt .bar-label {
+  font-weight: 500;
+}
+
+/* --- Recherche & filtres --- */
+.search-bar {
+  position: relative;
+}
+.search-bar .form-control {
+  padding-left: 2.5rem;
+}
+.search-bar .search-icon {
+  position: absolute;
+  left: 0.8rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #adb5bd;
+}
+
+/* --- Flash messages --- */
+.alert {
+  border-radius: 10px;
+  border: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+/* --- Footer --- */
+footer {
+  color: #6c757d;
+  font-size: 0.875rem;
+}
+footer a {
+  color: var(--primary);
+  text-decoration: none;
+}
+footer a:hover {
+  text-decoration: underline;
+}
+
+/* --- Indicateur de force du mot de passe --- */
+.password-strength {
+  height: 4px;
+  border-radius: 2px;
+  transition: width 0.3s, background-color 0.3s;
+}
+
+/* --- Modal profil --- */
+.modal-content {
+  border-radius: 12px;
+  border: none;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+.modal-header {
+  background: var(--gradient-bg);
+  color: #fff;
+  border-radius: 12px 12px 0 0;
+}
+.modal-header .btn-close {
+  filter: invert(1);
+}
+
+/* --- Pagination --- */
+.page-link {
+  border-radius: 6px !important;
+  margin: 0 2px;
+  border: none;
+  color: var(--primary);
+}
+.page-item.active .page-link {
+  background: var(--primary);
+  color: #fff;
+}
+
+/* --- Responsive --- */
+@media (max-width: 768px) {
+  .glass-card {
+    padding: 1rem;
+  }
+  .login-card {
+    margin: 2vh 1rem;
+  }
+  .table {
+    font-size: 0.875rem;
+  }
+}
