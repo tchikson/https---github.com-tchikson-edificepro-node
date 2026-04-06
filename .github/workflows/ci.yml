@@ -97,15 +97,15 @@ jobs:
           driver: docker
 
       - name: Build and start containers
-        run: docker compose up -d --build --wait --wait-timeout 300
+        run: docker compose -f compose.yaml up -d --build --wait --wait-timeout 120
 
       - name: Show logs on failure
         if: failure()
-        run: docker compose logs app
+        run: docker compose -f compose.yaml logs app
 
       - name: Health check
-        run: curl -f http://localhost:8080/login || (docker compose logs app && exit 1)
+        run: curl -f http://localhost:8080/login || (docker compose -f compose.yaml logs app && exit 1)
 
       - name: Stop containers
         if: always()
-        run: docker compose down
+        run: docker compose -f compose.yaml down
