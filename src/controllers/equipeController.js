@@ -42,7 +42,7 @@ async function create(req, res) {
         );
         if (conflict) {
           return res.status(409).json({
-            error: "L'utilisateur est déjà affecté à une autre équipe sur cette période.",
+            error: `L'utilisateur est déjà affecté à une autre équipe sur cette période.`,
           });
         }
         await EquipeUser.create({
