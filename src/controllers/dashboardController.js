@@ -1,14 +1,14 @@
 /**
- * Contrôleur du tableau de bord.
+ * Contrôleur du tableau de bord (API JSON).
  *
- * Affiche les chantiers selon le rôle :
+ * Renvoie les chantiers selon le rôle :
  * - Admin : tous les chantiers.
  * - Utilisateur : uniquement ses chantiers via ses équipes.
  */
 const { Chantier, Affectation, Equipe, EquipeUser } = require('../models');
 
 /**
- * GET /dashboard — Affiche le tableau de bord.
+ * GET /dashboard — Données du tableau de bord.
  */
 async function index(req, res) {
   try {
@@ -26,7 +26,6 @@ async function index(req, res) {
         ],
       });
     } else {
-      // Récupérer les chantiers liés aux équipes de l'utilisateur
       const equipeUsers = await EquipeUser.findAll({
         where: { utilisateurId: user.id },
         attributes: ['equipeId'],
@@ -51,15 +50,12 @@ async function index(req, res) {
       });
     }
 
-    res.render('dashboard/index', {
-      title: 'Tableau de bord',
+    res.json({
       chantiers,
-      user,
       isAdmin: user.hasRole('ROLE_ADMIN'),
     });
   } catch (err) {
-    req.flash('error', 'Erreur lors du chargement du tableau de bord.');
-    res.redirect('/');
+    res.status(500).json({ error: 'Erreur lors du chargement du tableau de bord.' });
   }
 }
 

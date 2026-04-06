@@ -1,19 +1,13 @@
 /**
  * Contrôleur pour la gestion des chantiers.
  *
- * Gère les opérations CRUD. Délègue la logique métier au ChantierService.
+ * Gère les opérations CRUD (API JSON). Délègue la logique métier au ChantierService.
  */
-const {
-  Chantier,
-  Equipe,
-  Affectation,
-  CompetenceChantier,
-  Competence,
-} = require('../models');
+const { Chantier, Equipe, Affectation, CompetenceChantier, Competence } = require('../models');
 const chantierService = require('../services/chantierService');
 
 /**
- * GET /chantier — Liste tous les chantiers.
+ * GET / — Liste tous les chantiers.
  */
 async function index(req, res) {
   const chantiers = await Chantier.findAll({
@@ -23,27 +17,18 @@ async function index(req, res) {
         as: 'affectations',
         include: [{ model: Equipe, as: 'equipe' }],
       },
+      {
+        model: CompetenceChantier,
+        as: 'competenceChantiers',
+        include: [{ model: Competence, as: 'competence' }],
+      },
     ],
   });
-  res.render('chantier/index', { title: 'Chantiers', chantiers });
+  res.json(chantiers);
 }
 
 /**
- * GET /chantier/new — Formulaire de création.
- */
-async function newForm(req, res) {
-  const equipes = await Equipe.findAll();
-  const competences = await Competence.findAll();
-  res.render('chantier/new', {
-    title: 'Nouveau chantier',
-    equipes,
-    competences,
-    chantier: {},
-  });
-}
-
-/**
- * POST /chantier — Crée un chantier.
+ * POST / — Crée un chantier.
  */
 async function create(req, res) {
   try {
@@ -56,7 +41,6 @@ async function create(req, res) {
       status,
     });
 
-    // Ajouter les compétences requises
     if (competences) {
       const compIds = Array.isArray(competences) ? competences : [competences];
       for (const compId of compIds) {
@@ -67,7 +51,6 @@ async function create(req, res) {
       }
     }
 
-    // Affecter les équipes sélectionnées
     if (equipes) {
       const eqIds = Array.isArray(equipes) ? equipes : [equipes];
       for (const eqId of eqIds) {
@@ -77,11 +60,9 @@ async function create(req, res) {
           dateFin,
         );
         if (overlap) {
-          req.flash(
-            'error',
-            'Une équipe a déjà un chantier sur cette période.',
-          );
-          return res.redirect('/chantier/new');
+          return res.status(409).json({
+            error: 'Une équipe a déjà un chantier sur cette période.',
+          });
         }
         await Affectation.create({
           equipeId: parseInt(eqId, 10),
@@ -92,19 +73,14 @@ async function create(req, res) {
       }
     }
 
-    req.flash('success', 'Chantier créé avec succès.');
-    res.redirect('/chantier');
+    res.status(201).json(chantier);
   } catch (err) {
-    req.flash(
-      'error',
-      err.message || 'Erreur lors de la création du chantier.',
-    );
-    res.redirect('/chantier/new');
+    res.status(400).json({ error: err.message || 'Erreur lors de la création du chantier.' });
   }
 }
 
 /**
- * GET /chantier/:id — Affiche un chantier.
+ * GET /:id — Affiche un chantier.
  */
 async function show(req, res) {
   const chantier = await Chantier.findByPk(req.params.id, {
@@ -122,51 +98,19 @@ async function show(req, res) {
     ],
   });
   if (!chantier) {
-    return res.status(404).render('errors/404', { title: 'Non trouvé' });
+    return res.status(404).json({ error: 'Chantier non trouvé.' });
   }
-  res.render('chantier/show', {
-    title: `Chantier — ${chantier.lieu}`,
-    chantier,
-  });
+  res.json(chantier);
 }
 
 /**
- * GET /chantier/:id/edit — Formulaire d'édition.
- */
-async function editForm(req, res) {
-  const chantier = await Chantier.findByPk(req.params.id, {
-    include: [
-      { model: CompetenceChantier, as: 'competenceChantiers' },
-      { model: Affectation, as: 'affectations' },
-    ],
-  });
-  if (!chantier) {
-    return res.status(404).render('errors/404', { title: 'Non trouvé' });
-  }
-  const equipes = await Equipe.findAll();
-  const competences = await Competence.findAll();
-  const selectedCompetences = chantier.competenceChantiers.map(
-    (cc) => cc.competenceId,
-  );
-  const selectedEquipes = chantier.affectations.map((a) => a.equipeId);
-  res.render('chantier/edit', {
-    title: 'Modifier le chantier',
-    chantier,
-    equipes,
-    competences,
-    selectedCompetences,
-    selectedEquipes,
-  });
-}
-
-/**
- * POST /chantier/:id/edit — Met à jour un chantier.
+ * PUT /:id — Met à jour un chantier.
  */
 async function update(req, res) {
   try {
     const chantier = await Chantier.findByPk(req.params.id);
     if (!chantier) {
-      return res.status(404).render('errors/404', { title: 'Non trouvé' });
+      return res.status(404).json({ error: 'Chantier non trouvé.' });
     }
     const { lieu, dateDebut, dateFin, status, competences, equipes } = req.body;
     await chantierService.updateChantier(chantier, {
@@ -176,7 +120,6 @@ async function update(req, res) {
       status,
     });
 
-    // Mettre à jour les compétences requises
     await CompetenceChantier.destroy({ where: { chantierId: chantier.id } });
     if (competences) {
       const compIds = Array.isArray(competences) ? competences : [competences];
@@ -188,7 +131,6 @@ async function update(req, res) {
       }
     }
 
-    // Mettre à jour les affectations d'équipes
     await Affectation.destroy({ where: { chantierId: chantier.id } });
     if (equipes) {
       const eqIds = Array.isArray(equipes) ? equipes : [equipes];
@@ -200,11 +142,9 @@ async function update(req, res) {
           chantier.id,
         );
         if (overlap) {
-          req.flash(
-            'error',
-            'Une équipe a déjà un chantier sur cette période.',
-          );
-          return res.redirect(`/chantier/${chantier.id}/edit`);
+          return res.status(409).json({
+            error: 'Une équipe a déjà un chantier sur cette période.',
+          });
         }
         await Affectation.create({
           equipeId: parseInt(eqId, 10),
@@ -215,29 +155,26 @@ async function update(req, res) {
       }
     }
 
-    req.flash('success', 'Chantier mis à jour.');
-    res.redirect('/chantier');
+    res.json(chantier);
   } catch (err) {
-    req.flash('error', err.message || 'Erreur lors de la mise à jour.');
-    res.redirect(`/chantier/${req.params.id}/edit`);
+    res.status(400).json({ error: err.message || 'Erreur lors de la mise à jour.' });
   }
 }
 
 /**
- * POST /chantier/:id/delete — Supprime un chantier.
+ * DELETE /:id — Supprime un chantier.
  */
 async function remove(req, res) {
   try {
     const chantier = await Chantier.findByPk(req.params.id);
     if (!chantier) {
-      return res.status(404).render('errors/404', { title: 'Non trouvé' });
+      return res.status(404).json({ error: 'Chantier non trouvé.' });
     }
     await chantierService.deleteChantier(chantier);
-    req.flash('success', 'Chantier supprimé.');
+    res.json({ ok: true });
   } catch (err) {
-    req.flash('error', 'Erreur lors de la suppression.');
+    res.status(500).json({ error: 'Erreur lors de la suppression.' });
   }
-  res.redirect('/chantier');
 }
 
-module.exports = { index, newForm, create, show, editForm, update, remove };
+module.exports = { index, create, show, update, remove };

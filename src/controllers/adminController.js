@@ -1,16 +1,14 @@
 /**
- * Contrôleur d'administration.
+ * Contrôleur d'administration (API JSON).
  *
- * Affiche le tableau de bord administrateur (ROLE_ADMIN uniquement).
+ * Tableau de bord administrateur (ROLE_ADMIN uniquement).
  */
 
 /**
  * GET /admin — Tableau de bord admin.
  */
 function index(req, res) {
-  res.render('admin/index', {
-    title: 'Administration',
-  });
+  res.json({ message: 'Administration' });
 }
 
 module.exports = { index };

@@ -1,12 +1,12 @@
 /**
- * Contrôleur pour les pages légales.
+ * Contrôleur pour les pages légales (API JSON).
  */
 
 /**
  * GET /mentions-legales
  */
 function mentionsLegales(req, res) {
-  res.render('legal/mentions-legales', { title: 'Mentions légales' });
+  res.json({ page: 'mentions-legales' });
 }
 
 module.exports = { mentionsLegales };

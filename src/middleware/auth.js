@@ -6,26 +6,23 @@
  */
 
 /**
- * Redirige vers /login si l'utilisateur n'est pas authentifié.
+ * Renvoie 401 JSON si l'utilisateur n'est pas authentifié.
  */
 function isAuthenticated(req, res, next) {
   if (req.isAuthenticated()) {
     return next();
   }
-  req.flash('error', 'Vous devez être connecté pour accéder à cette page.');
-  return res.redirect('/login');
+  return res.status(401).json({ error: 'Non authentifié.' });
 }
 
 /**
- * Renvoie 403 si l'utilisateur n'a pas le rôle ROLE_ADMIN.
+ * Renvoie 403 JSON si l'utilisateur n'a pas le rôle ROLE_ADMIN.
  */
 function isAdmin(req, res, next) {
   if (req.isAuthenticated() && req.user.hasRole('ROLE_ADMIN')) {
     return next();
   }
-  return res.status(403).render('errors/403', {
-    title: 'Accès interdit',
-  });
+  return res.status(403).json({ error: 'Accès interdit.' });
 }
 
 module.exports = { isAuthenticated, isAdmin };

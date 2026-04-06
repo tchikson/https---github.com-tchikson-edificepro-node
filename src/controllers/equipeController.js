@@ -1,19 +1,13 @@
 /**
  * Contrôleur pour la gestion des équipes.
  *
- * Gère les opérations CRUD. Délègue la logique métier à EquipeService.
+ * Gère les opérations CRUD (API JSON). Délègue la logique métier à EquipeService.
  */
-const {
-  Equipe,
-  EquipeUser,
-  User,
-  Affectation,
-  Chantier,
-} = require('../models');
+const { Equipe, EquipeUser, User, Affectation, Chantier } = require('../models');
 const equipeService = require('../services/equipeService');
 
 /**
- * GET /equipe — Liste toutes les équipes.
+ * GET / — Liste toutes les équipes.
  */
 async function index(req, res) {
   const equipes = await Equipe.findAll({
@@ -22,19 +16,11 @@ async function index(req, res) {
       { model: EquipeUser, as: 'equipeUsers' },
     ],
   });
-  res.render('equipe/index', { title: 'Équipes', equipes });
+  res.json(equipes);
 }
 
 /**
- * GET /equipe/new — Formulaire de création.
- */
-async function newForm(req, res) {
-  const users = await User.findAll();
-  res.render('equipe/new', { title: 'Nouvelle équipe', users, equipe: {} });
-}
-
-/**
- * POST /equipe — Crée une équipe.
+ * POST / — Crée une équipe.
  */
 async function create(req, res) {
   try {
@@ -46,7 +32,6 @@ async function create(req, res) {
       dateFin,
     });
 
-    // Ajouter les membres si fournis
     if (membres) {
       const memberList = Array.isArray(membres) ? membres : [membres];
       for (const userId of memberList) {
@@ -56,11 +41,9 @@ async function create(req, res) {
           dateFin,
         );
         if (conflict) {
-          req.flash(
-            'error',
-            `L'utilisateur est déjà affecté à une autre équipe sur cette période.`,
-          );
-          return res.redirect('/equipe/new');
+          return res.status(409).json({
+            error: "L'utilisateur est déjà affecté à une autre équipe sur cette période.",
+          });
         }
         await EquipeUser.create({
           equipeId: equipe.id,
@@ -71,16 +54,14 @@ async function create(req, res) {
       }
     }
 
-    req.flash('success', 'Équipe créée avec succès.');
-    res.redirect('/equipe');
+    res.status(201).json(equipe);
   } catch (err) {
-    req.flash('error', err.message || 'Erreur lors de la création.');
-    res.redirect('/equipe/new');
+    res.status(400).json({ error: err.message || 'Erreur lors de la création.' });
   }
 }
 
 /**
- * GET /equipe/:id — Affiche une équipe.
+ * GET /:id — Affiche une équipe.
  */
 async function show(req, res) {
   const equipe = await Equipe.findByPk(req.params.id, {
@@ -99,39 +80,19 @@ async function show(req, res) {
     ],
   });
   if (!equipe) {
-    return res.status(404).render('errors/404', { title: 'Non trouvé' });
+    return res.status(404).json({ error: 'Équipe non trouvée.' });
   }
-  res.render('equipe/show', { title: `Équipe — ${equipe.nomEquipe}`, equipe });
+  res.json(equipe);
 }
 
 /**
- * GET /equipe/:id/edit — Formulaire d'édition.
- */
-async function editForm(req, res) {
-  const equipe = await Equipe.findByPk(req.params.id, {
-    include: [{ model: EquipeUser, as: 'equipeUsers' }],
-  });
-  if (!equipe) {
-    return res.status(404).render('errors/404', { title: 'Non trouvé' });
-  }
-  const users = await User.findAll();
-  const currentMembers = equipe.equipeUsers.map((eu) => eu.utilisateurId);
-  res.render('equipe/edit', {
-    title: 'Modifier l\'équipe',
-    equipe,
-    users,
-    currentMembers,
-  });
-}
-
-/**
- * POST /equipe/:id/edit — Met à jour une équipe.
+ * PUT /:id — Met à jour une équipe.
  */
 async function update(req, res) {
   try {
     const equipe = await Equipe.findByPk(req.params.id);
     if (!equipe) {
-      return res.status(404).render('errors/404', { title: 'Non trouvé' });
+      return res.status(404).json({ error: 'Équipe non trouvée.' });
     }
     const { nomEquipe, chefEquipeId, dateDebut, dateFin, membres } = req.body;
     await equipe.update({
@@ -141,7 +102,6 @@ async function update(req, res) {
       dateFin,
     });
 
-    // Mettre à jour les membres
     if (membres) {
       const memberList = Array.isArray(membres) ? membres : [membres];
       const memberData = memberList.map((userId) => ({
@@ -151,33 +111,29 @@ async function update(req, res) {
       }));
       await equipeService.updateEquipeMembers(equipe, memberData);
     } else {
-      // Aucun membre sélectionné → supprimer tous les membres
       await EquipeUser.destroy({ where: { equipeId: equipe.id } });
     }
 
-    req.flash('success', 'Équipe mise à jour.');
-    res.redirect('/equipe');
+    res.json(equipe);
   } catch (err) {
-    req.flash('error', err.message || 'Erreur lors de la mise à jour.');
-    res.redirect(`/equipe/${req.params.id}/edit`);
+    res.status(400).json({ error: err.message || 'Erreur lors de la mise à jour.' });
   }
 }
 
 /**
- * POST /equipe/:id/delete — Supprime une équipe.
+ * DELETE /:id — Supprime une équipe.
  */
 async function remove(req, res) {
   try {
     const equipe = await Equipe.findByPk(req.params.id);
     if (!equipe) {
-      return res.status(404).render('errors/404', { title: 'Non trouvé' });
+      return res.status(404).json({ error: 'Équipe non trouvée.' });
     }
     await equipeService.deleteEquipe(equipe);
-    req.flash('success', 'Équipe supprimée.');
+    res.json({ ok: true });
   } catch (err) {
-    req.flash('error', 'Erreur lors de la suppression.');
+    res.status(500).json({ error: 'Erreur lors de la suppression.' });
   }
-  res.redirect('/equipe');
 }
 
-module.exports = { index, newForm, create, show, editForm, update, remove };
+module.exports = { index, create, show, update, remove };

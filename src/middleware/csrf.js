@@ -7,34 +7,31 @@ const crypto = require('crypto');
 
 /**
  * Génère un token CSRF et le stocke en session.
- * Le rend disponible dans res.locals pour les templates.
  */
 function generateCsrfToken(req, res, next) {
   if (!req.session.csrfToken) {
     req.session.csrfToken = crypto.randomBytes(32).toString('hex');
   }
-  res.locals.csrfToken = function () {
-    return req.session.csrfToken;
-  };
   next();
 }
 
 /**
- * Vérifie le token CSRF soumis dans le corps de la requête (champ _csrf).
+ * Vérifie le token CSRF soumis dans le corps ou l'en-tête x-csrf-token.
  */
 function verifyCsrfToken(req, res, next) {
-  const submittedToken = req.body._csrf;
+  const submittedToken = req.body._csrf || req.headers['x-csrf-token'];
   const storedToken = req.session.csrfToken;
+
+  const submittedBuf = Buffer.from(submittedToken || '', 'utf8');
+  const storedBuf = Buffer.from(storedToken || '', 'utf8');
 
   if (
     !submittedToken ||
     !storedToken ||
-    !crypto.timingSafeEqual(
-      Buffer.from(submittedToken, 'utf8'),
-      Buffer.from(storedToken, 'utf8'),
-    )
+    submittedBuf.length !== storedBuf.length ||
+    !crypto.timingSafeEqual(submittedBuf, storedBuf)
   ) {
-    return res.status(403).send('Token CSRF invalide.');
+    return res.status(403).json({ error: 'Token CSRF invalide.' });
   }
   next();
 }

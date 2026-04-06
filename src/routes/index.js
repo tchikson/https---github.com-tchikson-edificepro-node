@@ -1,5 +1,5 @@
 /**
- * Routeur principal — monte tous les sous-routeurs.
+ * Routeur principal — monte tous les sous-routeurs (API JSON).
  */
 const express = require('express');
 const router = express.Router();
@@ -13,13 +13,18 @@ const competenceRoutes = require('./competence');
 const userRoutes = require('./user');
 const legalRoutes = require('./legal');
 
-router.use('/', securityRoutes);
+// Endpoint CSRF token
+router.get('/csrf-token', (req, res) => {
+  res.json({ csrfToken: req.session.csrfToken });
+});
+
+router.use('/auth', securityRoutes);
 router.use('/admin', adminRoutes);
 router.use('/dashboard', dashboardRoutes);
-router.use('/chantier', chantierRoutes);
-router.use('/equipe', equipeRoutes);
-router.use('/competence', competenceRoutes);
-router.use('/user', userRoutes);
+router.use('/chantiers', chantierRoutes);
+router.use('/equipes', equipeRoutes);
+router.use('/competences', competenceRoutes);
+router.use('/users', userRoutes);
 router.use('/', legalRoutes);
 
 module.exports = router;

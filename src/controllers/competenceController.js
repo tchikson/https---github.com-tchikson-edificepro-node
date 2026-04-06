@@ -1,30 +1,20 @@
 /**
  * Contrôleur pour la gestion des compétences.
  *
- * CRUD compétences — réservé aux administrateurs.
+ * CRUD compétences (API JSON) — réservé aux administrateurs.
  */
 const { Competence } = require('../models');
 
 /**
- * GET /competence — Liste les compétences.
+ * GET / — Liste les compétences.
  */
 async function index(req, res) {
   const competences = await Competence.findAll();
-  res.render('competence/index', { title: 'Compétences', competences });
+  res.json(competences);
 }
 
 /**
- * GET /competence/new — Formulaire de création.
- */
-function newForm(req, res) {
-  res.render('competence/new', {
-    title: 'Nouvelle compétence',
-    competence: {},
-  });
-}
-
-/**
- * POST /competence — Crée une compétence.
+ * POST / — Crée une compétence.
  */
 async function create(req, res) {
   try {
@@ -32,87 +22,64 @@ async function create(req, res) {
 
     const existing = await Competence.findOne({ where: { nomCompetence } });
     if (existing) {
-      req.flash('error', 'Cette compétence existe déjà.');
-      return res.redirect('/competence/new');
+      return res.status(409).json({ error: 'Cette compétence existe déjà.' });
     }
 
-    await Competence.create({ nomCompetence });
-    req.flash('success', 'Compétence ajoutée avec succès.');
-    res.redirect('/competence');
+    const competence = await Competence.create({ nomCompetence });
+    res.status(201).json(competence);
   } catch (err) {
-    req.flash('error', 'Erreur lors de la création.');
-    res.redirect('/competence/new');
+    res.status(400).json({ error: 'Erreur lors de la création.' });
   }
 }
 
 /**
- * GET /competence/:id — Affiche une compétence.
+ * GET /:id — Affiche une compétence.
  */
 async function show(req, res) {
   const competence = await Competence.findByPk(req.params.id);
   if (!competence) {
-    return res.status(404).render('errors/404', { title: 'Non trouvé' });
+    return res.status(404).json({ error: 'Compétence non trouvée.' });
   }
-  res.render('competence/show', {
-    title: competence.nomCompetence,
-    competence,
-  });
+  res.json(competence);
 }
 
 /**
- * GET /competence/:id/edit — Formulaire d'édition.
- */
-async function editForm(req, res) {
-  const competence = await Competence.findByPk(req.params.id);
-  if (!competence) {
-    return res.status(404).render('errors/404', { title: 'Non trouvé' });
-  }
-  res.render('competence/edit', {
-    title: 'Modifier la compétence',
-    competence,
-  });
-}
-
-/**
- * POST /competence/:id/edit — Met à jour une compétence.
+ * PUT /:id — Met à jour une compétence.
  */
 async function update(req, res) {
   try {
     const competence = await Competence.findByPk(req.params.id);
     if (!competence) {
-      return res.status(404).render('errors/404', { title: 'Non trouvé' });
+      return res.status(404).json({ error: 'Compétence non trouvée.' });
     }
 
     const { nomCompetence } = req.body;
     const existing = await Competence.findOne({ where: { nomCompetence } });
     if (existing && existing.id !== competence.id) {
-      req.flash('error', 'Cette compétence existe déjà.');
-      return res.redirect(`/competence/${competence.id}/edit`);
+      return res.status(409).json({ error: 'Cette compétence existe déjà.' });
     }
 
     await competence.update({ nomCompetence });
-    req.flash('success', 'Compétence mise à jour.');
-    res.redirect('/competence');
+    res.json(competence);
   } catch (err) {
-    req.flash('error', 'Erreur lors de la mise à jour.');
-    res.redirect(`/competence/${req.params.id}/edit`);
+    res.status(400).json({ error: 'Erreur lors de la mise à jour.' });
   }
 }
 
 /**
- * POST /competence/:id/delete — Supprime une compétence.
+ * DELETE /:id — Supprime une compétence.
  */
 async function remove(req, res) {
   try {
     const competence = await Competence.findByPk(req.params.id);
-    if (competence) {
-      await competence.destroy();
-      req.flash('success', 'Compétence supprimée.');
+    if (!competence) {
+      return res.status(404).json({ error: 'Compétence non trouvée.' });
     }
+    await competence.destroy();
+    res.json({ ok: true });
   } catch (err) {
-    req.flash('error', 'Erreur lors de la suppression.');
+    res.status(500).json({ error: 'Erreur lors de la suppression.' });
   }
-  res.redirect('/competence');
 }
 
-module.exports = { index, newForm, create, show, editForm, update, remove };
+module.exports = { index, create, show, update, remove };

@@ -26,66 +26,65 @@ const app = require('../../src/app');
 
 describe('Sécurité', () => {
   describe('Headers de sécurité', () => {
-    it('renvoie les headers OWASP sur /login', async () => {
-      const res = await request(app).get('/login');
+    it('renvoie les headers OWASP sur /api/csrf-token', async () => {
+      const res = await request(app).get('/api/csrf-token');
       expect(res.headers['x-content-type-options']).toBe('nosniff');
       expect(res.headers['x-frame-options']).toBe('DENY');
       expect(res.headers['x-xss-protection']).toBe('0');
-      expect(res.headers['referrer-policy']).toBe(
-        'strict-origin-when-cross-origin',
-      );
+      expect(res.headers['referrer-policy']).toBe('strict-origin-when-cross-origin');
       expect(res.headers['permissions-policy']).toBeDefined();
     });
   });
 
   describe('Accès non authentifié', () => {
-    it('redirige /dashboard vers /login', async () => {
-      const res = await request(app).get('/dashboard');
-      expect(res.status).toBe(302);
-      expect(res.headers.location).toBe('/login');
+    it('renvoie 401 sur /api/dashboard', async () => {
+      const res = await request(app).get('/api/dashboard');
+      expect(res.status).toBe(401);
+      expect(res.body.error).toBeDefined();
     });
 
-    it('redirige /admin vers /login', async () => {
-      const res = await request(app).get('/admin');
-      expect(res.status).toBe(302);
-      expect(res.headers.location).toBe('/login');
+    it('renvoie 401 sur /api/admin', async () => {
+      const res = await request(app).get('/api/admin');
+      expect(res.status).toBe(401);
+      expect(res.body.error).toBeDefined();
     });
 
-    it('redirige /chantier vers /login', async () => {
-      const res = await request(app).get('/chantier');
-      expect(res.status).toBe(302);
-      expect(res.headers.location).toBe('/login');
+    it('renvoie 401 sur /api/chantiers', async () => {
+      const res = await request(app).get('/api/chantiers');
+      expect(res.status).toBe(401);
+      expect(res.body.error).toBeDefined();
     });
 
-    it('redirige /equipe vers /login', async () => {
-      const res = await request(app).get('/equipe');
-      expect(res.status).toBe(302);
-      expect(res.headers.location).toBe('/login');
+    it('renvoie 401 sur /api/equipes', async () => {
+      const res = await request(app).get('/api/equipes');
+      expect(res.status).toBe(401);
+      expect(res.body.error).toBeDefined();
     });
 
-    it('redirige /competence vers /login', async () => {
-      const res = await request(app).get('/competence');
-      expect(res.status).toBe(302);
-      expect(res.headers.location).toBe('/login');
+    it('renvoie 401 sur /api/competences', async () => {
+      const res = await request(app).get('/api/competences');
+      expect(res.status).toBe(401);
+      expect(res.body.error).toBeDefined();
     });
   });
 
   describe('Pages publiques', () => {
-    it('accède à /login sans redirection', async () => {
-      const res = await request(app).get('/login');
+    it('accède à /api/csrf-token sans authentification', async () => {
+      const res = await request(app).get('/api/csrf-token');
       expect(res.status).toBe(200);
+      expect(res.body.csrfToken).toBeDefined();
     });
 
-    it('accède à /mentions-legales sans redirection', async () => {
-      const res = await request(app).get('/mentions-legales');
+    it('accède à /api/mentions-legales sans authentification', async () => {
+      const res = await request(app).get('/api/mentions-legales');
       expect(res.status).toBe(200);
     });
   });
 
   describe('Protection CSRF', () => {
-    it('rejette POST /login sans token CSRF', async () => {
+    it('rejette POST /api/auth/login sans token CSRF', async () => {
       const res = await request(app)
-        .post('/login')
+        .post('/api/auth/login')
         .send({ email: 'test@test.com', password: 'test' });
       expect(res.status).toBe(403);
     });
