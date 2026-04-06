@@ -10,7 +10,7 @@ const logger = createLogger({
   format: format.combine(
     format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
     format.errors({ stack: true }),
-    format.json()
+    format.json(),
   ),
   defaultMeta: { service: 'edificepro' },
   transports: [
@@ -24,7 +24,7 @@ const securityLogger = createLogger({
   level: 'info',
   format: format.combine(
     format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-    format.json()
+    format.json(),
   ),
   defaultMeta: { channel: 'security' },
   transports: [
