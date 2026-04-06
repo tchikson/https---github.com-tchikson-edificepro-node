@@ -1,14 +1,15 @@
 services:
   app:
-    image: node:20-alpine
-    working_dir: /usr/src/app
-    command: sh -c "apk add --no-cache python3 make g++ && npm install && cd client && npm install && npm run build && cd .. && node src/server.js"
+    build:
+      context: .
+      dockerfile: docker/node/Dockerfile
+    command: sh docker/node/entrypoint.sh
     healthcheck:
       test: ['CMD-SHELL', 'wget -q -O /dev/null http://localhost:3000/api/csrf-token || exit 1']
       interval: 10s
       timeout: 5s
-      retries: 5
-      start_period: 300s
+      retries: 30
+      start_period: 120s
     volumes:
       - .:/usr/src/app:cached
       - node_modules:/usr/src/app/node_modules

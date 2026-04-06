@@ -15,8 +15,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "22"
-          cache: "npm"
+          node-version: '22'
+          cache: 'npm'
 
       - name: Install dependencies
         run: npm ci
@@ -34,7 +34,7 @@ jobs:
         env:
           POSTGRES_DB: app_test
           POSTGRES_USER: app
-          POSTGRES_PASSWORD: "!ChangeMe!"
+          POSTGRES_PASSWORD: '!ChangeMe!'
         ports:
           - 5432:5432
         options: >-
@@ -49,8 +49,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "22"
-          cache: "npm"
+          node-version: '22'
+          cache: 'npm'
 
       - name: Install dependencies
         run: npm ci
@@ -62,7 +62,7 @@ jobs:
           DB_PORT: 5432
           DB_NAME: app_test
           DB_USER: app
-          DB_PASSWORD: "!ChangeMe!"
+          DB_PASSWORD: '!ChangeMe!'
         run: npx sequelize-cli db:migrate
 
       - name: Run tests
@@ -72,7 +72,7 @@ jobs:
           DB_PORT: 5432
           DB_NAME: app_test
           DB_USER: app
-          DB_PASSWORD: "!ChangeMe!"
+          DB_PASSWORD: '!ChangeMe!'
           APP_SECRET: test-secret
         run: npm test -- --coverage
 
@@ -91,16 +91,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build Docker image
-        run: docker compose build
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          driver: docker
 
-      - name: Start containers
-        run: docker compose up -d
+      - name: Build and start containers
+        run: docker compose up -d --build --wait --wait-timeout 300
+
+      - name: Show logs on failure
+        if: failure()
+        run: docker compose logs app
 
       - name: Health check
-        run: |
-          sleep 10
-          curl -f http://localhost:8080/login || exit 1
+        run: curl -f http://localhost:8080/login || (docker compose logs app && exit 1)
 
       - name: Stop containers
+        if: always()
         run: docker compose down
