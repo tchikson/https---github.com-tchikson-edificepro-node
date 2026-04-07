@@ -1,6 +1,5 @@
 /**
  * Démarrage du serveur Express.
- *
  * Synchronise la base Sequelize puis lance le serveur HTTP.
  */
 require('dotenv').config();
