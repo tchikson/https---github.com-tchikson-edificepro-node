@@ -220,6 +220,23 @@ module.exports = {
         updatedAt: now,
       },
     ]);
+
+    // --- Reset sequences after explicit ID inserts ---
+    const tables = [
+      'users',
+      'competences',
+      'equipes',
+      'chantiers',
+      'competence_users',
+      'competence_chantiers',
+      'equipe_users',
+      'affectations',
+    ];
+    for (const table of tables) {
+      await queryInterface.sequelize.query(
+        `SELECT setval('${table}_id_seq', (SELECT COALESCE(MAX(id), 1) FROM "${table}"))`,
+      );
+    }
   },
 
   async down(queryInterface) {
