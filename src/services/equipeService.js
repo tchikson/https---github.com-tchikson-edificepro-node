@@ -5,7 +5,7 @@
  * gestion des membres, et opérations CRUD.
  */
 const { Op } = require('sequelize');
-const { Equipe, EquipeUser, Affectation } = require('../models');
+const { Equipe, EquipeUser, Affectation, sequelize } = require('../models');
 const { logger } = require('../config/logger');
 
 /**
@@ -43,17 +43,22 @@ async function findConflictingAssignment(
  */
 async function createEquipe(data, memberIds = []) {
   try {
-    const equipe = await Equipe.create(data);
-    for (const userId of memberIds) {
-      await EquipeUser.create({
-        equipeId: equipe.id,
-        utilisateurId: userId,
-        dateDebut: data.dateDebut,
-        dateFin: data.dateFin,
-      });
-    }
-    logger.info(`Équipe créée : ${equipe.id}`);
-    return equipe;
+    return sequelize.transaction(async (transaction) => {
+      const equipe = await Equipe.create(data, { transaction });
+      for (const userId of memberIds) {
+        await EquipeUser.create(
+          {
+            equipeId: equipe.id,
+            utilisateurId: userId,
+            dateDebut: data.dateDebut,
+            dateFin: data.dateFin,
+          },
+          { transaction },
+        );
+      }
+      logger.info(`Équipe créée : ${equipe.id}`);
+      return equipe;
+    });
   } catch (err) {
     logger.error('Erreur création équipe', { error: err.message });
     throw err;
@@ -67,16 +72,21 @@ async function createEquipe(data, memberIds = []) {
  */
 async function updateEquipeMembers(equipe, members) {
   try {
-    await EquipeUser.destroy({ where: { equipeId: equipe.id } });
-    for (const member of members) {
-      await EquipeUser.create({
-        equipeId: equipe.id,
-        utilisateurId: member.utilisateurId,
-        dateDebut: member.dateDebut,
-        dateFin: member.dateFin,
-      });
-    }
-    logger.info(`Membres de l'équipe ${equipe.id} mis à jour`);
+    return sequelize.transaction(async (transaction) => {
+      await EquipeUser.destroy({ where: { equipeId: equipe.id }, transaction });
+      for (const member of members) {
+        await EquipeUser.create(
+          {
+            equipeId: equipe.id,
+            utilisateurId: member.utilisateurId,
+            dateDebut: member.dateDebut,
+            dateFin: member.dateFin,
+          },
+          { transaction },
+        );
+      }
+      logger.info(`Membres de l'équipe ${equipe.id} mis à jour`);
+    });
   } catch (err) {
     logger.error('Erreur mise à jour membres équipe', { error: err.message });
     throw err;

@@ -16,16 +16,20 @@ jest.mock('../../src/models', () => {
   const mockAffectation = {
     destroy: jest.fn(),
   };
+  const mockSequelize = {
+    transaction: jest.fn(async (callback) => callback({})),
+  };
 
   return {
     EquipeUser: mockEquipeUser,
     Equipe: mockEquipe,
     Affectation: mockAffectation,
+    sequelize: mockSequelize,
   };
 });
 
 const equipeService = require('../../src/services/equipeService');
-const { EquipeUser, Equipe, Affectation } = require('../../src/models');
+const { EquipeUser, Equipe, Affectation, sequelize } = require('../../src/models');
 
 describe('EquipeService', () => {
   afterEach(() => jest.clearAllMocks());
@@ -71,14 +75,27 @@ describe('EquipeService', () => {
         [2, 3],
       );
 
-      expect(Equipe.create).toHaveBeenCalledWith({
-        nomEquipe: 'Alpha',
-        chefEquipeId: 1,
-        dateDebut: '2025-01-01',
-        dateFin: '2025-06-30',
-      });
+      expect(Equipe.create).toHaveBeenCalledWith(
+        {
+          nomEquipe: 'Alpha',
+          chefEquipeId: 1,
+          dateDebut: '2025-01-01',
+          dateFin: '2025-06-30',
+        },
+        { transaction: {} },
+      );
       expect(EquipeUser.create).toHaveBeenCalledTimes(2);
+      expect(EquipeUser.create).toHaveBeenCalledWith(
+        {
+          equipeId: 1,
+          utilisateurId: 2,
+          dateDebut: '2025-01-01',
+          dateFin: '2025-06-30',
+        },
+        { transaction: {} },
+      );
       expect(result).toEqual(mockEquipe);
+      expect(sequelize.transaction).toHaveBeenCalledTimes(1);
     });
   });
 

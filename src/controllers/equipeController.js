@@ -25,34 +25,27 @@ async function index(req, res) {
 async function create(req, res) {
   try {
     const { nomEquipe, chefEquipeId, dateDebut, dateFin, membres } = req.body;
-    const equipe = await equipeService.createEquipe({
-      nomEquipe,
-      chefEquipeId: chefEquipeId || null,
-      dateDebut,
-      dateFin,
-    });
+    const memberList = membres ? (Array.isArray(membres) ? membres : [membres]) : [];
+    const parsedMembers = memberList.map((userId) => parseInt(userId, 10));
 
-    if (membres) {
-      const memberList = Array.isArray(membres) ? membres : [membres];
-      for (const userId of memberList) {
-        const conflict = await equipeService.findConflictingAssignment(
-          parseInt(userId, 10),
-          dateDebut,
-          dateFin,
-        );
-        if (conflict) {
-          return res.status(409).json({
-            error: `L'utilisateur est déjà affecté à une autre équipe sur cette période.`,
-          });
-        }
-        await EquipeUser.create({
-          equipeId: equipe.id,
-          utilisateurId: parseInt(userId, 10),
-          dateDebut,
-          dateFin,
+    for (const userId of parsedMembers) {
+      const conflict = await equipeService.findConflictingAssignment(userId, dateDebut, dateFin);
+      if (conflict) {
+        return res.status(409).json({
+          error: `L'utilisateur est déjà affecté à une autre équipe sur cette période.`,
         });
       }
     }
+
+    const equipe = await equipeService.createEquipe(
+      {
+        nomEquipe,
+        chefEquipeId: chefEquipeId || null,
+        dateDebut,
+        dateFin,
+      },
+      parsedMembers,
+    );
 
     res.status(201).json(equipe);
   } catch (err) {
@@ -104,12 +97,27 @@ async function update(req, res) {
 
     if (membres) {
       const memberList = Array.isArray(membres) ? membres : [membres];
-      const memberData = memberList.map((userId) => ({
+      const members = memberList.map((userId) => ({
         utilisateurId: parseInt(userId, 10),
         dateDebut,
         dateFin,
       }));
-      await equipeService.updateEquipeMembers(equipe, memberData);
+
+      for (const member of members) {
+        const conflict = await equipeService.findConflictingAssignment(
+          member.utilisateurId,
+          dateDebut,
+          dateFin,
+          equipe.id,
+        );
+        if (conflict) {
+          return res.status(409).json({
+            error: `L'utilisateur est déjà affecté à une autre équipe sur cette période.`,
+          });
+        }
+      }
+
+      await equipeService.updateEquipeMembers(equipe, members);
     } else {
       await EquipeUser.destroy({ where: { equipeId: equipe.id } });
     }
